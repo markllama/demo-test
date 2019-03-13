@@ -58,7 +58,7 @@ node(TARGET_NODE) {
         stage('push demo test script') {
             echo "pushing demo test script"
             sh "${SSH} mkdir -p bin demos"
-            sh "${SCP} scripts/run_script.py ${SSH_HOST_SPEC}:bin"
+            sh "${SCP} scripts/run_demo.py ${SSH_HOST_SPEC}:bin"
             sh "${SSH} chmod a+x bin/\\*"
         }
 
@@ -83,7 +83,7 @@ node(TARGET_NODE) {
             echo "execute test"
             result = sh (
                 returnStdout: true,
-                script: "${SSH} bin/run_script.py -t demos/${DEMO_NAME}"
+                script: "${SSH} bin/run_demo.py -t demos/${DEMO_NAME}"
             )
             echo "result = --- \n${result}\n---"
             
