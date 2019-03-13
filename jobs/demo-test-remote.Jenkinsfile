@@ -23,6 +23,24 @@ properties(
                     $class: 'hudson.model.StringParameterDefinition',
                 ],
                 [
+                    name: "DEMO_GIT_REPO",
+                    description: "Where to find the demo page and test code",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "https://github.com:kubevirt.github.io.git"
+                ],
+                [
+                    name: "DEMO_GIT_BRANCH",
+                    description: "The branch that contains the of the demo to run",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "master"
+                ],
+                [
+                    name: "DEMO_ROOT",
+                    description: "The directory that contains the demo tests",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: '_includes/scriptlets'
+                ],
+                [
                     name: 'INSTANCE_DNS_NAME',
                     description: "Name of host to execute the demo",
                     $class: 'hudson.model.StringParameterDefinition',
@@ -74,9 +92,36 @@ node(TARGET_NODE) {
             // sh "${SSH} chmod a+x bin/\*"
         }
 
+        stage('clone demo repo') {
+            echo "cloning demo repo"
+            checkout(
+                [
+                    $class: "GitSCM",
+                    userRemoteConfigs: [
+                        [
+                            url: DEMO_GIT_REPO
+                        ]
+                    ],
+                    branches: [
+                        [
+                            name: DEMO_GIT_BRANCH
+                        ]
+                    ],
+                    extensions: [
+                        [
+                            $class: 'RelativeTargetDirectory',
+                            relativeTargetDir: 'demos'
+                        ]
+                    ]
+                ]
+            )
+        }
+        
         stage('push demo files') {
             echo "push demo files"
-            sh "${SCP} -r _includes/scriptlets/${DEMO_NAME} ${SSH_HOST_SPEC}:demos/"
+            dir('demos') {
+                sh "${SCP} -r ${DEMO_ROOT}/${DEMO_NAME} ${SSH_HOST_SPEC}:demos/"
+            }
         }
 
         stage("execute test") {
