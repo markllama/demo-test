@@ -26,7 +26,7 @@ properties(
                     name: "DEMO_GIT_REPO",
                     description: "Where to find the demo page and test code",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "https://github.com:kubevirt.github.io.git"
+                    defaultValue: "https://github.com/kubevirt/kubevirt.github.io.git"
                 ],
                 [
                     name: "DEMO_GIT_BRANCH",
@@ -140,5 +140,5 @@ node(TARGET_NODE) {
     }
 
 
-    archive includes: "demo-test-result-*.txt"
+    archiveArtifacts artifacts: "demo-test-result-*.txt"
 }
