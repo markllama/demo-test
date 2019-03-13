@@ -2,7 +2,7 @@
 
 #
 # Push a demo test to a remote host with kubevirt installed
-# Push the run_script.py script to the remote host
+# Push the run_demo.py script to the remote host
 # Execute the demo test on the remote host
 #
 
@@ -13,7 +13,7 @@
 declare -A DEFAULTS
 
 DEFAULTS[REMOTE_USERNAME]=centos
-DEFAULTS[RUN_DEMO_SCRIPT]="~/kubevirt.github.io/scripts/run_script.py"
+DEFAULTS[RUN_DEMO_SCRIPT]="~/demo-test/scripts/run_demo.py"
 DEFAULTS[DEBUG_SCRIPT]=""
 DEFAULTS[DEMO_ROOT]="~/kubevirt.github.io/_includes/scriptlets"
 
