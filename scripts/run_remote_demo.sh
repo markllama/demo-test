@@ -72,9 +72,9 @@ function apply_defaults() {
 # =============================================================================
 
 # Check if the run script is a file
-if [ ! -r ${DEMO_NAME} ] ; then
-    # compose the demo path from defaults
-fi
+#if [ ! -r ${DEMO_NAME} ] ; then
+#    # compose the demo path from defaults
+#fi
 
 DEMO_DIR=$2
 RUN_SCRIPT=$3
