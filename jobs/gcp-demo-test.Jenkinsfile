@@ -122,6 +122,10 @@ properties(
 persist = PERSIST.toBoolean()
 debug = DEBUG.toBoolean()
 
+def setupJob
+def executeJob
+def teardownJob
+
 node(TARGET_NODE) {
 
     checkout scm
@@ -129,7 +133,7 @@ node(TARGET_NODE) {
     stage("create instance") {
         echo "Creating instance"
 
-        setup = build(
+        setupJob = build(
             job: 'gcp-setup',
             propagate: true,
             parameters: [
@@ -191,120 +195,156 @@ node(TARGET_NODE) {
             ]
         )
 
-        currentBuild.displayName = "kubevirt-demos:${setup.displayName}"
-        currentBuild.result = setup.result
+        currentBuild.displayName = "kubevirt-demos:${setupJob.displayName}"
+        currentBuild.result = setupJob.result
         
         // grab the returned INSTANCE_ID from the build job variables
-        GCP_INSTANCE_ID = setup.getBuildVariables().INSTANCE_ID
-        GCP_INSTANCE_DNS_NAME = setup.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
+        GCP_INSTANCE_ID = setupJob.getBuildVariables().INSTANCE_ID
+        GCP_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
 
     }
 
-    stage("execute demo") {
-        execute = build(
-            job: "demo-test",
-            propagate: false,
-            parameters: [
-                [
-                    name: 'TARGET_NODE',
-                    value: TARGET_NODE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'INSTANCE_DNS_NAME',
-                    value: GCP_INSTANCE_DNS_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'INSTANCE_SSH_PRIVATE_KEY',
-                    value: GCP_INSTANCE_PRIVATE_KEY_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'INSTANCE_SSH_USERNAME',
-                    value: GCP_INSTANCE_USERNAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_NAME',
-                    value: DEMO_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_GIT_REPO',
-                    value: DEMO_GIT_REPO,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_GIT_BRANCH',
-                    value: DEMO_GIT_BRANCH,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_ROOT',
-                    value: DEMO_ROOT,
-                    $class: 'StringParameterValue'
+    try {
+        stage("execute demo") {
+            executeJob = build(
+                job: "demo-test",
+                propagate: false,
+                parameters: [
+                    [
+                        name: 'TARGET_NODE',
+                        value: TARGET_NODE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'INSTANCE_DNS_NAME',
+                        value: GCP_INSTANCE_DNS_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'INSTANCE_SSH_PRIVATE_KEY',
+                        value: GCP_INSTANCE_PRIVATE_KEY_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'INSTANCE_SSH_USERNAME',
+                        value: GCP_INSTANCE_USERNAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_NAME',
+                        value: DEMO_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_GIT_REPO',
+                        value: DEMO_GIT_REPO,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_GIT_BRANCH',
+                        value: DEMO_GIT_BRANCH,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_ROOT',
+                        value: DEMO_ROOT,
+                        $class: 'StringParameterValue'
+                    ]
                 ]
-            ]
-        )
+            )
 
-        copyArtifacts(
-            projectName: 'demo-test',
-            selector: specific("${execute.number}")
-        )
-        
-    }
-    
-    stage("delete instance") {
-        echo "Deleting instance"
-        setup = build(
-            job: 'gcp-teardown',
-            propagate: true,
-            parameters: [
-                [
-                    name: 'TARGET_NODE',
-                    value: TARGET_NODE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_PROJECT',
-                    value: GCP_PROJECT,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_SERVICE_ACCOUNT',
-                    value: GCP_SERVICE_ACCOUNT,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_KEY_FILE',
-                    value: GCP_KEY_FILE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_ZONE',
-                    value: GCP_ZONE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_INSTANCE_NAME',
-                    value: GCP_INSTANCE_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'PERSIST',
-                    value: true,
-                    $class: 'BooleanParameterValue',
-                ],
-                [
-                    name: 'DEBUG',
-                    value: DEBUG,
-                    $class: 'BooleanParameterValue',
+            copyArtifacts(
+                projectName: 'demo-test',
+                selector: specific("${executeJob.number}")
+            )
+            
+        }
+    } catch (error) {
+        // report demo failure
+        if (NOTIFY_EMAIL_FAIL != '') {
+            echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
+            // Compose the body of a FAIL email
+            // Start time
+            // End time
+            // Duration
+            // Stdout
+            startTime = new Date(currentBuild.startTimeInMillis)
+            demoStartTime = new Date(executeJob.startTimeInMillis)
+            
+            body = """
+Name           : gcp-demo-test ${currentBuild.number}
+Start Time     : ${startTime.toString()}
+Total Duration : ${currentBuild.durationString}
+Total Status   : ${currentBuild.currentResult}
+
+Demo Name      : ${DEMO_NAME}
+Demo Start Time: ${demoStartTime}
+Demo Duration  : ${executeJob.durationString}
+Demo Status    : ${executeJob.currentResult}
+
+Test URL       : ${currentBuild.absoluteUrl}
+"""
+
+            mail(
+                to: NOTIFY_EMAIL_FAIL,
+                from: "kubevirt-demo-test@redhat.com",
+                replyTo: "mlamouri+jenkins@redhat.com",
+                subject: "[gcp-demo-test] FAIL",
+                body: body
+            )
+        }
+    } finally {
+
+        stage("teardown instance") {
+            echo "Deleting instance"
+            teardownJob = build(
+                job: 'gcp-teardown',
+                propagate: true,
+                parameters: [
+                    [
+                        name: 'TARGET_NODE',
+                        value: TARGET_NODE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_PROJECT',
+                        value: GCP_PROJECT,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_SERVICE_ACCOUNT',
+                        value: GCP_SERVICE_ACCOUNT,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_KEY_FILE',
+                        value: GCP_KEY_FILE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_ZONE',
+                        value: GCP_ZONE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_INSTANCE_NAME',
+                        value: GCP_INSTANCE_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'PERSIST',
+                        value: true,
+                        $class: 'BooleanParameterValue',
+                    ],
+                    [
+                        name: 'DEBUG',
+                        value: DEBUG,
+                        $class: 'BooleanParameterValue',
+                    ]
                 ]
-            ]
-        )
+            )
+        }
     }
-
     archive includes: "demo-test-result-*.txt"
 
     if (!persist) {
@@ -312,3 +352,39 @@ node(TARGET_NODE) {
         deleteDir()
     } 
 }
+
+if (executeJob.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
+    echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
+    // Compose the body of a PASS email
+    // Start time
+    // End time
+    // Duration
+    // Stdout
+    startTime = new Date(currentBuild.startTimeInMillis)
+    demoStartTime = new Date(executeJob.startTimeInMillis)
+    
+    body = """
+Name           : gcp-demo-test ${currentBuild.number}
+Start Time     : ${startTime.toString()}
+Total Duration : ${currentBuild.durationString}
+Total Status   : ${currentBuild.currentResult}
+
+Demo Name      : ${DEMO_NAME}
+Demo Start Time: ${demoStartTime}
+Demo Duration  : ${executeJob.durationString}
+Demo Status    : ${executeJob.currentResult}
+
+Test URL       : ${currentBuild.absoluteUrl}
+"""
+
+    mail(
+        to: NOTIFY_EMAIL_PASS,
+        from: "kubevirt-demo-test@redhat.com",
+        replyTo: "mlamouri+jenkins@redhat.com",
+        subject: "[gcp-demo-test] PASS",
+        body: body
+    )
+} else {
+    echo "No recipients for PASS email provided"
+}
+

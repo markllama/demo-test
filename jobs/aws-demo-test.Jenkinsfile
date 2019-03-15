@@ -288,7 +288,6 @@ Test URL       : ${currentBuild.absoluteUrl}
                     ]
                 ]
             )
-            currentBuild.result = teardownJob.result    
         }
 
         archiveArtifacts artifacts: "demo-test-result-*.txt"
