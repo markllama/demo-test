@@ -112,6 +112,10 @@ debug = DEBUG.toBoolean()
 
 node(TARGET_NODE) {
 
+    def setup
+    def execute
+    def teardown
+    
     sh "aws configure set region ${AWS_REGION}"
 
     stage("create instance") {
@@ -260,13 +264,20 @@ node(TARGET_NODE) {
         // Duration
         // Stdout
         startTime = new Date(currentBuild.startTimeInMillis)
-
+        demoStartTime = new Date(execute.startTimeInMillis)
+        
         body = """
-Name      : aws-demo-test ${currentBuild.number}
-Start Time: ${startTime.toString()}
-Duration  : ${currentBuild.durationString}
-Test URL  : ${currentBuild.absoluteUrl}
-Status:   : ${currentBuild.currentResult}
+Name           : aws-demo-test ${currentBuild.number}
+Start Time     : ${startTime.toString()}
+Total Duration : ${currentBuild.durationString}
+Total Status   : ${currentBuild.currentResult}
+
+Demo Name      : ${DEMO_NAME}
+Demo Start Time: ${demoStartTime}
+Demo Duration  : ${execute.durationString}
+Demo Status    : ${execute.currentResult}
+
+Test URL       : ${currentBuild.absoluteUrl}
 """
 
         mail(
