@@ -283,7 +283,8 @@ Test URL       : ${currentBuild.absoluteUrl}
 
         mail(
             to: NOTIFY_EMAIL_PASS,
-            from: "mlamouri+jenkins@redhat.com",
+            from: "kubevirt-demo-test@redhat.com"
+            replyTo: "mlamouri+jenkins@redhat.com",
             subject: "[aws-demo-test] PASS",
             body: body
         )
