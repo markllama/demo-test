@@ -168,102 +168,139 @@ node(TARGET_NODE) {
         AWS_INSTANCE_DNS_NAME = setup.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
     }
 
-    stage("execute demo") {
-        execute = build(
-            job: "demo-test",
-            propagate: true,
-            parameters: [
-                [
-                    name: 'TARGET_NODE',
-                    value: TARGET_NODE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'INSTANCE_DNS_NAME',
-                    value: AWS_INSTANCE_DNS_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'INSTANCE_SSH_PRIVATE_KEY',
-                    value: INSTANCE_SSH_PRIVATE_KEY,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'INSTANCE_SSH_USERNAME',
-                    value: INSTANCE_SSH_USERNAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_NAME',
-                    value: DEMO_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_GIT_REPO',
-                    value: DEMO_GIT_REPO,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_GIT_BRANCH',
-                    value: DEMO_GIT_BRANCH,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'DEMO_ROOT',
-                    value: DEMO_ROOT,
-                    $class: 'StringParameterValue'
+    try {
+        stage("execute demo") {
+            execute = build(
+                job: "demo-test",
+                propagate: true,
+                parameters: [
+                    [
+                        name: 'TARGET_NODE',
+                        value: TARGET_NODE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'INSTANCE_DNS_NAME',
+                        value: AWS_INSTANCE_DNS_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'INSTANCE_SSH_PRIVATE_KEY',
+                        value: INSTANCE_SSH_PRIVATE_KEY,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'INSTANCE_SSH_USERNAME',
+                        value: INSTANCE_SSH_USERNAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_NAME',
+                        value: DEMO_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_GIT_REPO',
+                        value: DEMO_GIT_REPO,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_GIT_BRANCH',
+                        value: DEMO_GIT_BRANCH,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'DEMO_ROOT',
+                        value: DEMO_ROOT,
+                        $class: 'StringParameterValue'
+                    ]
                 ]
-            ]
-        )
+            )
 
-        copyArtifacts(
-            projectName: 'demo-test',
-            selector: specific("${execute.number}")
-        )
-    }
-    
-    stage("teardown instance") {
+            copyArtifacts(
+                projectName: 'demo-test',
+                selector: specific("${execute.number}")
+            )
+        }
+    } catch (error) {
+        // report demo failure
+        if (NOTIFY_EMAIL_FAIL != '') {
+            echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
+            // Compose the body of a FAIL email
+            // Start time
+            // End time
+            // Duration
+            // Stdout
+            startTime = new Date(currentBuild.startTimeInMillis)
+            demoStartTime = new Date(execute.startTimeInMillis)
+            
+            body = """
+Name           : aws-demo-test ${currentBuild.number}
+Start Time     : ${startTime.toString()}
+Total Duration : ${currentBuild.durationString}
+Total Status   : ${currentBuild.currentResult}
 
-        echo "AWS_INSTANCE_ID = ${AWS_INSTANCE_ID}"
+Demo Name      : ${DEMO_NAME}
+Demo Start Time: ${demoStartTime}
+Demo Duration  : ${execute.durationString}
+Demo Status    : ${execute.currentResult}
 
-        teardown = build(
-            job: 'aws-teardown',
-            propagate: true,
-            parameters: [
-                [
-                    name: 'TARGET_NODE',
-                    value: TARGET_NODE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'AWS_CREDENTIALS',
-                    value: AWS_CREDENTIALS,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'AWS_REGION',
-                    value: AWS_REGION,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'AWS_INSTANCE_ID',
-                    value: AWS_INSTANCE_ID,
-                    $class: 'StringParameterValue'
+Test URL       : ${currentBuild.absoluteUrl}
+"""
+
+            mail(
+                to: NOTIFY_EMAIL_FAIL,
+                from: "kubevirt-demo-test@redhat.com",
+                replyTo: "mlamouri+jenkins@redhat.com",
+                subject: "[aws-demo-test] FAIL",
+                body: body
+            )
+        }
+    } finally {
+
+        stage("teardown instance") {
+
+            echo "AWS_INSTANCE_ID = ${AWS_INSTANCE_ID}"
+
+            teardown = build(
+                job: 'aws-teardown',
+                propagate: true,
+                parameters: [
+                    [
+                        name: 'TARGET_NODE',
+                        value: TARGET_NODE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'AWS_CREDENTIALS',
+                        value: AWS_CREDENTIALS,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'AWS_REGION',
+                        value: AWS_REGION,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'AWS_INSTANCE_ID',
+                        value: AWS_INSTANCE_ID,
+                        $class: 'StringParameterValue'
+                    ]
                 ]
-            ]
-        )
-        currentBuild.result = teardown.result    
+            )
+            currentBuild.result = teardown.result    
+        }
+
+        archiveArtifacts artifacts: "demo-test-result-*.txt"
+
+        if (!persist) {
+            cleanWs()
+            deleteDir()
+        } 
     }
-
-    archiveArtifacts artifacts: "demo-test-result-*.txt"
-
-    if (!persist) {
-        cleanWs()
-        deleteDir()
-    } 
 }
 
-if (NOTIFY_EMAIL_PASS != '') {
+if (execute.currentStatus == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
     echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
     // Compose the body of a PASS email
     // Start time
