@@ -253,6 +253,29 @@ node(TARGET_NODE) {
 
     archiveArtifacts artifacts: "demo-test-result-*.txt"
 
+    if (NOTIFY_EMAIL_PASS != '') {
+        // Compose the body of a PASS email
+        // Start time
+        // End time
+        // Duration
+        // Stdout
+        startTime = Date(currentBuild.startTimeInMillis)
+
+        body = """
+Name      : aws-demo-test ${currentBuild.number}
+Start Time: ${startTime.toString()}
+Duration  : ${currentBuild.durationString}
+Test URL  : ${currentBuild.absoluteUrl}
+Status:   : ${currentBuild.currentResult}
+"""
+
+        mail(
+            to: NOTIFY_EMAIL_PASS,
+            subject: "[aws-demo-test] PASS"
+            body: body
+        )
+    }
+
     if (!persist) {
         cleanWs()
         deleteDir()
