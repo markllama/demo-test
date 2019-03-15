@@ -171,7 +171,7 @@ node(TARGET_NODE) {
     try {
         stage("execute demo") {
             executeJob = build(
-                job: "demo-test",
+                job: "demo-test-remote",
                 propagate: true,
                 parameters: [
                     [
@@ -218,7 +218,7 @@ node(TARGET_NODE) {
             )
 
             copyArtifacts(
-                projectName: 'demo-test',
+                projectName: 'demo-test-remote',
                 selector: specific("${executeJob.number}")
             )
         }
