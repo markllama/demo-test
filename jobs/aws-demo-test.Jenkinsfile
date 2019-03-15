@@ -274,6 +274,8 @@ Status:   : ${currentBuild.currentResult}
             subject: "[aws-demo-test] PASS",
             body: body
         )
+    } else {
+        echo "No recipients for PASS email provided"
     }
 
     if (!persist) {
