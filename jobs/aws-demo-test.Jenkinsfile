@@ -299,21 +299,19 @@ Demo URL       : ${executeJob.absoluteUrl}
         } 
     }
 
-}
+    currentBuild.currentResult = executeJob.currentResult
 
-currentBuild.currentResult = executeJob.currentResult
-
-if (executeJob.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
-    echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
-    // Compose the body of a PASS email
-    // Start time
-    // End time
-    // Duration
-    // Stdout
-    startTime = new Date(currentBuild.startTimeInMillis)
-    demoStartTime = new Date(executeJob.startTimeInMillis)
-    
-    body = """
+    if (executeJob.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
+        echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
+        // Compose the body of a PASS email
+        // Start time
+        // End time
+        // Duration
+        // Stdout
+        startTime = new Date(currentBuild.startTimeInMillis)
+        demoStartTime = new Date(executeJob.startTimeInMillis)
+        
+        body = """
 Name           : aws-demo-test ${currentBuild.number}
 Start Time     : ${startTime.toString()}
 Total Duration : ${currentBuild.durationString}
@@ -328,14 +326,16 @@ Demo URL       : ${executeJob.absoluteUrl}
 
 """
 
-    mail(
-        to: NOTIFY_EMAIL_PASS,
-        from: "kubevirt-demo-test@redhat.com",
-        replyTo: "mlamouri+jenkins@redhat.com",
-        subject: "[aws-demo-test] PASS",
-        body: body
-    )
-} else {
-    echo "No recipients for PASS email provided"
+        mail(
+            to: NOTIFY_EMAIL_PASS,
+            from: "kubevirt-demo-test@redhat.com",
+            replyTo: "mlamouri+jenkins@redhat.com",
+            subject: "[aws-demo-test] PASS",
+            body: body
+        )
+    } else {
+        echo "No recipients for PASS email provided"
+    }
 }
+
 
