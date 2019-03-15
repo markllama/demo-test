@@ -71,7 +71,9 @@ SCP = "scp ${SSH_OPTIONS}"
 node(TARGET_NODE) {
 
     checkout scm
-    
+
+    sh "ssh-keygen -R ${INSTANCE_DNS_NAME}"
+
     sshagent([INSTANCE_SSH_PRIVATE_KEY]) {
 
         stage('push demo test script') {
