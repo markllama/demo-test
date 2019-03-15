@@ -271,7 +271,7 @@ Status:   : ${currentBuild.currentResult}
 
         mail(
             to: NOTIFY_EMAIL_PASS,
-            subject: "[aws-demo-test] PASS"
+            subject: "[aws-demo-test] PASS",
             body: body
         )
     }
