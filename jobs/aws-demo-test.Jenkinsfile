@@ -259,7 +259,7 @@ node(TARGET_NODE) {
         // End time
         // Duration
         // Stdout
-        startTime = Date(currentBuild.startTimeInMillis)
+        startTime = new Date(currentBuild.startTimeInMillis)
 
         body = """
 Name      : aws-demo-test ${currentBuild.number}
@@ -271,6 +271,7 @@ Status:   : ${currentBuild.currentResult}
 
         mail(
             to: NOTIFY_EMAIL_PASS,
+            from: "mlamouri+jenkins@redhat.com",
             subject: "[aws-demo-test] PASS",
             body: body
         )
