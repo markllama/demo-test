@@ -110,16 +110,16 @@ properties(
 persist = PERSIST.toBoolean()
 debug = DEBUG.toBoolean()
 
-def setup
-def execute
-def teardown
+def setupJob
+def executeJob
+def teardownJob
 
 node(TARGET_NODE) {
     
     sh "aws configure set region ${AWS_REGION}"
 
     stage("create instance") {
-        setup = build(
+        setupJob = build(
             job: 'aws-setup',
             propagate: true,
             parameters: [
@@ -160,17 +160,17 @@ node(TARGET_NODE) {
                 ]
             ]
         )
-        currentBuild.displayName = "kubevirt-demos:${setup.displayName}"
-        currentBuild.result = setup.result
+        currentBuild.displayName = "kubevirt-demos:${setupJob.displayName}"
+        currentBuild.result = setupJob.result
 
         // grab the returned INSTANCE_ID from the build job variables
-        AWS_INSTANCE_ID = setup.getBuildVariables().INSTANCE_ID
-        AWS_INSTANCE_DNS_NAME = setup.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
+        AWS_INSTANCE_ID = setupJob.getBuildVariables().INSTANCE_ID
+        AWS_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
     }
 
     try {
         stage("execute demo") {
-            execute = build(
+            executeJob = build(
                 job: "demo-test",
                 propagate: true,
                 parameters: [
@@ -219,7 +219,7 @@ node(TARGET_NODE) {
 
             copyArtifacts(
                 projectName: 'demo-test',
-                selector: specific("${execute.number}")
+                selector: specific("${executeJob.number}")
             )
         }
     } catch (error) {
@@ -232,7 +232,7 @@ node(TARGET_NODE) {
             // Duration
             // Stdout
             startTime = new Date(currentBuild.startTimeInMillis)
-            demoStartTime = new Date(execute.startTimeInMillis)
+            demoStartTime = new Date(executeJob.startTimeInMillis)
             
             body = """
 Name           : aws-demo-test ${currentBuild.number}
@@ -242,8 +242,8 @@ Total Status   : ${currentBuild.currentResult}
 
 Demo Name      : ${DEMO_NAME}
 Demo Start Time: ${demoStartTime}
-Demo Duration  : ${execute.durationString}
-Demo Status    : ${execute.currentResult}
+Demo Duration  : ${executeJob.durationString}
+Demo Status    : ${executeJob.currentResult}
 
 Test URL       : ${currentBuild.absoluteUrl}
 """
@@ -262,7 +262,7 @@ Test URL       : ${currentBuild.absoluteUrl}
 
             echo "AWS_INSTANCE_ID = ${AWS_INSTANCE_ID}"
 
-            teardown = build(
+            teardownJob = build(
                 job: 'aws-teardown',
                 propagate: true,
                 parameters: [
@@ -288,7 +288,7 @@ Test URL       : ${currentBuild.absoluteUrl}
                     ]
                 ]
             )
-            currentBuild.result = teardown.result    
+            currentBuild.result = teardownJob.result    
         }
 
         archiveArtifacts artifacts: "demo-test-result-*.txt"
@@ -300,7 +300,7 @@ Test URL       : ${currentBuild.absoluteUrl}
     }
 }
 
-if (execute.currentStatus == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
+if (executeJob.currentStatus == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
     echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
     // Compose the body of a PASS email
     // Start time
@@ -308,7 +308,7 @@ if (execute.currentStatus == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
     // Duration
     // Stdout
     startTime = new Date(currentBuild.startTimeInMillis)
-    demoStartTime = new Date(execute.startTimeInMillis)
+    demoStartTime = new Date(executeJob.startTimeInMillis)
     
     body = """
 Name           : aws-demo-test ${currentBuild.number}
@@ -318,8 +318,8 @@ Total Status   : ${currentBuild.currentResult}
 
 Demo Name      : ${DEMO_NAME}
 Demo Start Time: ${demoStartTime}
-Demo Duration  : ${execute.durationString}
-Demo Status    : ${execute.currentResult}
+Demo Duration  : ${executeJob.durationString}
+Demo Status    : ${executeJob.currentResult}
 
 Test URL       : ${currentBuild.absoluteUrl}
 """
