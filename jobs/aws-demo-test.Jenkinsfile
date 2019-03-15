@@ -258,6 +258,7 @@ node(TARGET_NODE) {
     archiveArtifacts artifacts: "demo-test-result-*.txt"
 
     if (NOTIFY_EMAIL_PASS != '') {
+        echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
         // Compose the body of a PASS email
         // Start time
         // End time
