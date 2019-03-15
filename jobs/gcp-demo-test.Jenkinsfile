@@ -276,13 +276,14 @@ Name           : gcp-demo-test ${currentBuild.number}
 Start Time     : ${startTime.toString()}
 Total Duration : ${currentBuild.durationString}
 Total Status   : ${currentBuild.currentResult}
+Total URL      : ${currentBuild.absoluteUrl}
 
 Demo Name      : ${DEMO_NAME}
 Demo Start Time: ${demoStartTime}
 Demo Duration  : ${executeJob.durationString}
 Demo Status    : ${executeJob.currentResult}
+Demo URL       : ${executeJob.absoluteUrl}
 
-Test URL       : ${currentBuild.absoluteUrl}
 """
 
             mail(
