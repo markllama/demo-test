@@ -77,6 +77,18 @@ properties(
                     defaultValue: '_includes/scriptlets'
                 ],
                 [
+                    name: "NOTIFY_EMAIL_PASS",
+                    description: "A comma separated list of email addressed to notify on success",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: ''  
+                ],
+                [
+                    name: "NOTIFY_EMAIL_FAIL",
+                    description: "A comma separated list of email addressed to notify on failure",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: ''  
+                ],
+                [
                     name: 'PERSIST',
                     description: 'leave the minikube service in place',
                     $class: 'hudson.model.BooleanParameterDefinition',
