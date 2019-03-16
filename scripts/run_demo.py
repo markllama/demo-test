@@ -203,6 +203,30 @@ if __name__ == "__main__":
     spec = yaml.load(open(os.path.join(opts.test_dir, "test_spec.yaml")))    
 
     #
+    # Check preprequisites
+    #
+    if 'requirements' in spec:
+
+        # - Check Files
+        if 'files' in spec['requirements']:
+            for filespec in spec['requirements']['files']:
+                logging.info("Checking requirement: file - {}".
+                             format(filespec['path']))
+                # check for present
+
+                # check for executable
+
+        # - Check Commands
+        if 'commands' in spec['requirements']:
+            for cmdspec in spec['requirements']['commands']:
+                logging.info("Checking requirement: command - {}".
+                             format(cmdspec['name'])) 
+
+                # check for command in path
+
+                # check execute works
+    
+    #
     # Execute a single specified step or the complete sequence from start to end
     #
     logging.info("Demo Test '{}': BEGIN".format(spec['test']['name']))
