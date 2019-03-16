@@ -213,8 +213,14 @@ if __name__ == "__main__":
                 logging.info("Checking requirement: file - {}".
                              format(filespec['path']))
                 # check for present
+                if 'present' in filespec:
+                    if os.path.isfile(filespec['path']) != filespec['present']:
+                        pass
 
+                if 'executable' in filespec:
                 # check for executable
+                    if os.access(filespec['path'], os.X_OK) != filespec['executable']:
+                        pass
 
         # - Check Commands
         if 'commands' in spec['test']['requirements']:
