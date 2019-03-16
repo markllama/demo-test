@@ -96,7 +96,7 @@ node(TARGET_NODE) {
             echo "execute test"
             result = sh (
                 returnStdout: true,
-                script: "scripts/run_demo.py -t demos/${DEMO_ROOT}/${DEMO_NAME}"
+                script: "scripts/run_demo.py -d -t demos/${DEMO_ROOT}/${DEMO_NAME}"
             )
             echo "result = --- \n${result}\n---"
             
