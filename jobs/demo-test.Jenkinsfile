@@ -87,7 +87,7 @@ node(TARGET_NODE) {
 
     withEnv(
         [
-            "PATH=${KUBECTL_PATH}:${PATH}"
+            "PATH=${KUBECTL_PATH}:${PATH}",
             "KUBECONFIG=${KUBECONFIG}"
         ]
     ) {
