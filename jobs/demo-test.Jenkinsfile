@@ -50,6 +50,18 @@ properties(
                     description: "The directory that contains the demo tests",
                     $class: 'hudson.model.StringParameterDefinition',
                     defaultValue: '_includes/scriptlets'
+                ],
+                [
+                    name: 'PERSIST',
+                    description: 'leave the minikube service in place',
+                    $class: 'hudson.model.BooleanParameterDefinition',
+                    defaultValue: false
+                ],
+                [
+                    name: 'DEBUG',
+                    description: 'ask commands to print details',
+                    $class: 'hudson.model.BooleanParameterDefinition',
+                    defaultValue: false
                 ]
             ]
         ]
@@ -108,4 +120,13 @@ node(TARGET_NODE) {
     }
 
     archiveArtifacts artifacts: "demo-test-result-*.txt"
+
+
+
+    if (!persist) {
+        cleanWs()
+        deleteDir()
+    } 
+    
 }
+
