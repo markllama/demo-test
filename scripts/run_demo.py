@@ -205,11 +205,11 @@ if __name__ == "__main__":
     #
     # Check preprequisites
     #
-    if 'requirements' in spec:
+    if 'requirements' in spec['test']:
 
         # - Check Files
-        if 'files' in spec['requirements']:
-            for filespec in spec['requirements']['files']:
+        if 'files' in spec['test']['requirements']:
+            for filespec in spec['test']['requirements']['files']:
                 logging.info("Checking requirement: file - {}".
                              format(filespec['path']))
                 # check for present
@@ -217,8 +217,8 @@ if __name__ == "__main__":
                 # check for executable
 
         # - Check Commands
-        if 'commands' in spec['requirements']:
-            for cmdspec in spec['requirements']['commands']:
+        if 'commands' in spec['test']['requirements']:
+            for cmdspec in spec['test']['requirements']['commands']:
                 logging.info("Checking requirement: command - {}".
                              format(cmdspec['name'])) 
 
