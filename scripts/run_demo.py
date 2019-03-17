@@ -234,7 +234,7 @@ if __name__ == "__main__":
     # Check preprequisites
     #
     if 'requirements' in spec['test']:
-        req_stats = check_reqirements(spec['test']['requirements'], opts)
+        req_stats = check_requirements(spec['test']['requirements'], opts)
 
     # Execute a single specified step or the complete sequence from start to end
     #
