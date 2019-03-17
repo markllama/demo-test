@@ -56,6 +56,34 @@ def process_cli():
 # ----------------------------------------------------------------------------
 # TESTING FUNCTIONS
 # ----------------------------------------------------------------------------
+def check_requirements(r, opts):
+    # - Check Files
+    if 'files' in r:
+        for filespec in r['files']:
+            logging.info("Checking requirement: file - {}".
+                         format(filespec['path']))
+            # check for present
+            if 'present' in filespec:
+                if os.path.isfile(filespec['path']) != filespec['present']:
+                    pass
+
+            if 'executable' in filespec:
+                # check for executable
+                if os.access(filespec['path'], os.X_OK) != filespec['executable']:
+                    pass
+
+    # - Check Commands
+    if 'commands' in r:
+        for cmdspec in r['commands']:
+            logging.info("Checking requirement: command - {}".
+                         format(cmdspec['name'])) 
+
+        # check for command in path
+
+        # check execute works
+    
+    #
+
 
 def run_step(t, opts):
     """Run a single step from a test spec"""
@@ -206,33 +234,8 @@ if __name__ == "__main__":
     # Check preprequisites
     #
     if 'requirements' in spec['test']:
+        req_stats = check_reqirements(spec['test']['requirements'], opts)
 
-        # - Check Files
-        if 'files' in spec['test']['requirements']:
-            for filespec in spec['test']['requirements']['files']:
-                logging.info("Checking requirement: file - {}".
-                             format(filespec['path']))
-                # check for present
-                if 'present' in filespec:
-                    if os.path.isfile(filespec['path']) != filespec['present']:
-                        pass
-
-                if 'executable' in filespec:
-                # check for executable
-                    if os.access(filespec['path'], os.X_OK) != filespec['executable']:
-                        pass
-
-        # - Check Commands
-        if 'commands' in spec['test']['requirements']:
-            for cmdspec in spec['test']['requirements']['commands']:
-                logging.info("Checking requirement: command - {}".
-                             format(cmdspec['name'])) 
-
-                # check for command in path
-
-                # check execute works
-    
-    #
     # Execute a single specified step or the complete sequence from start to end
     #
     logging.info("Demo Test '{}': BEGIN".format(spec['test']['name']))
