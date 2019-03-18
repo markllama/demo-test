@@ -369,7 +369,7 @@ if (executeJob.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
     demoStartTime = new Date(executeJob.startTimeInMillis)
     
     body = """
-Name           : gcp-demo-test ${currentBuild.number}
+Name           : demo-test-gcp ${currentBuild.number}
 Start Time     : ${startTime.toString()}
 Total Duration : ${currentBuild.durationString}
 Total Status   : ${currentBuild.currentResult}
@@ -387,7 +387,7 @@ Demo URL       : ${executeJob.absoluteUrl}
         to: NOTIFY_EMAIL_PASS,
         from: "kubevirt-demo-test@redhat.com",
         replyTo: "mlamouri+jenkins@redhat.com",
-        subject: "[gcp-demo-test] PASS",
+        subject: "[demo-test-gcp] PASS",
         body: body
     )
 } else {
