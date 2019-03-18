@@ -76,6 +76,11 @@ demo = build(
             $class: 'StringParameterValue'
         ],
         [
+            name: 'AWS_CREDENTIALS',
+            value: 'aws-credentials',
+            $class: 'StringParameterValue'
+        ],
+        [
             name: "DEMO_NAME",
             value: DEMO_NAME,
             $class: 'StringParameterValue'
