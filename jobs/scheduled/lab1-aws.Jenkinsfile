@@ -12,6 +12,30 @@ properties(
             $class: 'ParametersDefinitionProperty',
             parameterDefinitions: [
                 [
+                    name: 'DEMO_NAME',
+                    description: "The username for SSH to the instance",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: 'lab1'
+                ],
+                [
+                    name: "DEMO_GIT_REPO",
+                    description: "Where to find the demo page and test code",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "https://github.com/kubevirt/kubevirt.github.io.git"
+                ],
+                [
+                    name: "DEMO_GIT_BRANCH",
+                    description: "The branch that contains the of the demo to run",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "master"
+                ],
+                [
+                    name: "DEMO_ROOT",
+                    description: "The directory that contains the demo tests",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: '_includes/scriptlets'
+                ],
+                [
                     name: "NOTIFY_EMAIL_PASS",
                     description: "A comma separated list of email addressed to notify on success",
                     $class: 'hudson.model.StringParameterDefinition',
@@ -50,6 +74,26 @@ demo = build(
             value: OWNER_NUMBER,
             $class: 'StringParameterValue',
             defaultValue: AWS_OWNER_NUMBER
+        ],
+        [
+            name: "DEMO_NAME",
+            value: DEMO_NAME,
+            $class: 'StringParameterValue',
+        ],
+        [
+            name: "DEMO_GIT_REPO",
+            value: DEMO_GIT_REPO,
+            $class: 'StringParameterValue',
+        ],
+        [
+            name: "DEMO_GIT_BRANCH",
+            value: DEMO_GIT_BRANCH,
+            $class: 'StringParameterValue',
+        ],
+        [
+            name: "DEMO_ROOT",
+            value: DEMO_ROOT,
+            $class: 'StringParameterValue',
         ],
         [
             name: "NOTIFY_EMAIL_PASS",
