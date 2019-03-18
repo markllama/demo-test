@@ -8,7 +8,7 @@ properties(
                 numToKeepStr: '360')
         ),
         disableConcurrentBuilds()
-                [
+        parameters: [
             $class: 'ParametersDefinitionProperty',
             parameterDefinitions: [
                 [
@@ -68,6 +68,7 @@ properties(
 
 demo = build(
     job: "kubevirt/aws-demo-test",
+    propagate: false,
     parameters: [
         [
             name: 'OWNER_NUMBER',
@@ -78,36 +79,36 @@ demo = build(
         [
             name: "DEMO_NAME",
             value: DEMO_NAME,
-            $class: 'StringParameterValue',
+            $class: 'StringParameterValue'
         ],
         [
             name: "DEMO_GIT_REPO",
             value: DEMO_GIT_REPO,
-            $class: 'StringParameterValue',
+            $class: 'StringParameterValue'
         ],
         [
             name: "DEMO_GIT_BRANCH",
             value: DEMO_GIT_BRANCH,
-            $class: 'StringParameterValue',
+            $class: 'StringParameterValue'
         ],
         [
             name: "DEMO_ROOT",
             value: DEMO_ROOT,
-            $class: 'StringParameterValue',
+            $class: 'StringParameterValue'
         ],
         [
             name: "NOTIFY_EMAIL_PASS",
             value: NOTIFY_EMAIL_PASS,
-            $class: 'StringParameterValue',
+            $class: 'StringParameterValue'
         ],
         [
             name: "NOTIFY_EMAIL_FAIL",
             value: NOTIFY_EMAIL_FAIL,
-            $class: 'StringParameterValue',
-        ],
+            $class: 'StringParameterValue'
+        ]
     ]
 
 )
-    
+
 currentBuild.displayName = "lab1 @ ${demo.displayName}"
 currentBuild.result = demo.result
