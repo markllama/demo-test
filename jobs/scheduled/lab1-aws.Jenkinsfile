@@ -7,8 +7,8 @@ properties(
                 daysToKeepStr: '',
                 numToKeepStr: '360')
         ),
-        disableConcurrentBuilds()
-        parameters: [
+        disableConcurrentBuilds(),
+        [
             $class: 'ParametersDefinitionProperty',
             parameterDefinitions: [
                 [
