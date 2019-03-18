@@ -72,9 +72,8 @@ demo = build(
     parameters: [
         [
             name: 'OWNER_NUMBER',
-            value: OWNER_NUMBER,
-            $class: 'StringParameterValue',
-            defaultValue: AWS_OWNER_NUMBER
+            value: AWS_OWNER_NUMBER,
+            $class: 'StringParameterValue'
         ],
         [
             name: "DEMO_NAME",
