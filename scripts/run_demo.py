@@ -56,34 +56,61 @@ def process_cli():
 # ----------------------------------------------------------------------------
 # TESTING FUNCTIONS
 # ----------------------------------------------------------------------------
-def check_requirements(r, opts):
+
+#
+# result
+#
+class Result:
+
+    def __init__(self, check=None, status=None, message=""):
+        self.check = check
+        self.status = status
+        self.message = message
+
+def check_requirements(r):
+
+    results = []
+    
     # - Check Files
     if 'files' in r:
         for filespec in r['files']:
-            logging.info("Checking requirement: file - {}".
-                         format(filespec['path']))
-            # check for present
-            if 'present' in filespec:
-                if os.path.isfile(filespec['path']) != filespec['present']:
-                    pass
-
-            if 'executable' in filespec:
-                # check for executable
-                if os.access(filespec['path'], os.X_OK) != filespec['executable']:
-                    pass
+            results.append(check_file(filespec))
 
     # - Check Commands
     if 'commands' in r:
         for cmdspec in r['commands']:
-            logging.info("Checking requirement: command - {}".
-                         format(cmdspec['name'])) 
+            results.append(check_command(cmdspec))
 
-        # check for command in path
+    return results
 
-        # check execute works
+def check_file(f): 
+    logging.info("Checking requirement: file - {}".
+                 format(f['path']))
+
+    r = Result(f)
+
+    # check for present
+    if 'present' in f:
+        if os.path.isfile(f['path']) != f['present']:
+            r.status = "FAIL"
+            
+    if 'executable' in f:
+        # check for executable
+        if os.access(f['path'], os.X_OK) != f['executable']:
+            r.status = "FAIL"
+
+    return r
+
+def check_command(c):
+    logging.info("Checking requirement: command - {}".format(c['name'])) 
     
-    #
+    r = Result(c)
+    # check for command in path
 
+    # check execute works
+
+    return r
+    
 
 def run_step(t, opts):
     """Run a single step from a test spec"""
@@ -234,8 +261,9 @@ if __name__ == "__main__":
     # Check preprequisites
     #
     if 'requirements' in spec['test']:
-        req_stats = check_requirements(spec['test']['requirements'], opts)
-
+        checks = check_requirements(spec['test']['requirements'])
+        # do all checks pass?
+        
     # Execute a single specified step or the complete sequence from start to end
     #
     logging.info("Demo Test '{}': BEGIN".format(spec['test']['name']))
