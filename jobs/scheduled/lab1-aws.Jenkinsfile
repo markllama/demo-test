@@ -12,6 +12,24 @@ properties(
             $class: 'ParametersDefinitionProperty',
             parameterDefinitions: [
                 [
+                    name: 'INSTANCE_KEYPAIR_NAME',
+                    description: "AWS SSH Keypair Name",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: 'kubevirt-demos-ssh-name'
+                ],
+                [
+                    name: 'INSTANCE_SSH_PRIVATE_KEY',
+                    description: "Name of the SSH credentials for AWS instance",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: 'kubevirt-demos-ssh'
+                ],
+                [
+                    name: "INSTANCE_SSH_USERNAME",
+                    description: "The username for SSH to the instance",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: 'centos'
+                ],
+                [
                     name: 'DEMO_NAME',
                     description: "The username for SSH to the instance",
                     $class: 'hudson.model.StringParameterDefinition',
@@ -78,6 +96,16 @@ demo = build(
         [
             name: 'AWS_CREDENTIALS',
             value: 'aws-credentials',
+            $class: 'StringParameterValue'
+        ],
+        [
+            name: 'INSTANCE_KEYPAIR_NAME',
+            value: 'kubevirt-demos',
+            $class: 'StringParameterValue'
+        ],
+        [
+            name: 'INSTANCE_SSH_PRIVATE_KEY',
+            value: 'kubevirt-demos',
             $class: 'StringParameterValue'
         ],
         [
