@@ -81,7 +81,7 @@ node(TARGET_NODE) {
                     name: "TARGET_NODE",
                     value: TARGET_NODE,
                     $class: 'StringParameterValue'
-                ],                
+                ],
                 [
                     name: "DEMO_NAME",
                     value: DEMO_NAME,
