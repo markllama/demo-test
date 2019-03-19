@@ -57,7 +57,7 @@ properties(
                     description: "The username for SSH to the instance",
                     $class: 'hudson.model.StringParameterDefinition',
                     defaultValue: 'centos'
-                ]
+                ],
                 [
                     name: 'PERSIST',
                     description: 'leave the minikube service in place',
