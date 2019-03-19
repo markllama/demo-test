@@ -58,6 +58,18 @@ properties(
                     $class: 'hudson.model.StringParameterDefinition',
                     defaultValue: 'centos'
                 ]
+                [
+                    name: 'PERSIST',
+                    description: 'leave the minikube service in place',
+                    $class: 'hudson.model.BooleanParameterDefinition',
+                    defaultValue: false
+                ],
+                [
+                    name: 'DEBUG',
+                    description: 'ask commands to print details',
+                    $class: 'hudson.model.BooleanParameterDefinition',
+                    defaultValue: false
+                ]
             ]
         ]
     ]
@@ -67,6 +79,9 @@ SSH_HOST_SPEC = "${INSTANCE_SSH_USERNAME}@${INSTANCE_DNS_NAME}"
 SSH_OPTIONS = "-o StrictHostKeyChecking=no"
 SSH = "ssh ${SSH_OPTIONS} ${SSH_HOST_SPEC}"
 SCP = "scp ${SSH_OPTIONS}"
+
+persist = PERSIST.toBoolean()
+debug = DEBUG.toBoolean()
 
 node(TARGET_NODE) {
 
@@ -159,4 +174,9 @@ node(TARGET_NODE) {
 
 
     archiveArtifacts artifacts: "demo-test-result-*.txt"
+
+    if (!persist) {
+        cleanWs()
+        deleteDir()
+    }
 }
