@@ -134,7 +134,7 @@ node(TARGET_NODE) {
 
             return_code = sh(
                 returnStatus: true,
-                script: "${SSH} scripts/run_demo.py -d -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename}"
+                script: "${SSH} bin/run_demo.py -d -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename}"
             )
 
             if (return_code != 0) {
