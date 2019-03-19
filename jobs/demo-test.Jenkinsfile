@@ -119,7 +119,7 @@ node(TARGET_NODE) {
 //                script: "scripts/run_demo.py -d -t demos/${DEMO_ROOT}/${DEMO_NAME}"
 //            )
 
-            def result = readFile :file filename
+            def result = readFile file: filename
             echo "result = --- \n${result}\n---"
             
             // writeFile(
@@ -130,8 +130,6 @@ node(TARGET_NODE) {
     }
 
     archiveArtifacts artifacts: "demo-test-result-*.txt"
-
-
 
     if (!persist) {
         cleanWs()
