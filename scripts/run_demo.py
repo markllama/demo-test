@@ -37,6 +37,9 @@ def process_cli():
     parser.add_argument("-d", "--debug", action="store_true", default=False,
                         help="Print information useful to a script debugger")
 
+    parser.add_argument("-o", "--output", default="",
+                        help="write output to the specified file")
+
     parser.add_argument("-t", "--test-dir", required=True,
                         help="The location of the test to run")
     
@@ -249,10 +252,15 @@ if __name__ == "__main__":
 
     opts = process_cli()
 
-    if opts.debug:
-        logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+    if opts.output == "":
+        output_file = sys.stdout
     else:
-        logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+        output_file = file(opts.output, 'w')
+
+    if opts.debug:
+        logging.basicConfig(level=logging.DEBUG, stream=output_file)
+    else:
+        logging.basicConfig(level=logging.INFO, stream=output_file)
 
     # Read the demo test spec into a test spec structure
     spec = yaml.load(open(os.path.join(opts.test_dir, "test_spec.yaml")))    
