@@ -263,32 +263,36 @@ Demo URL       : ${executeJob.absoluteUrl}
 
             echo "AWS_INSTANCE_ID = ${AWS_INSTANCE_ID}"
 
-            teardownJob = build(
-                job: 'aws-teardown',
-                propagate: true,
-                parameters: [
-                    [
-                        name: 'TARGET_NODE',
-                        value: TARGET_NODE,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'AWS_CREDENTIALS',
-                        value: AWS_CREDENTIALS,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'AWS_REGION',
-                        value: AWS_REGION,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'AWS_INSTANCE_ID',
-                        value: AWS_INSTANCE_ID,
-                        $class: 'StringParameterValue'
+            if (!persist) {
+                teardownJob = build(
+                    job: 'aws-teardown',
+                    propagate: true,
+                    parameters: [
+                        [
+                            name: 'TARGET_NODE',
+                            value: TARGET_NODE,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'AWS_CREDENTIALS',
+                            value: AWS_CREDENTIALS,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'AWS_REGION',
+                            value: AWS_REGION,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'AWS_INSTANCE_ID',
+                            value: AWS_INSTANCE_ID,
+                            $class: 'StringParameterValue'
+                        ]
                     ]
-                ]
-            )
+                )
+            } else {
+                echo "Keeping instance"
+            }
         }
 
         archiveArtifacts artifacts: "demo-test-result-*.txt"
