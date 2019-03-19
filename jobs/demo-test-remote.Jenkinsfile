@@ -146,7 +146,7 @@ node(TARGET_NODE) {
             //    script: "${SSH} bin/run_demo.py -t demos/${DEMO_NAME}"
             // )
 
-            def result = readFile :file filename
+            def result = readFile file: filename
             echo "result = --- \n${result}\n---"
             
             // writeFile(
