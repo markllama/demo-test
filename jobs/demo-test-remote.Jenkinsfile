@@ -140,7 +140,8 @@ node(TARGET_NODE) {
             if (return_code != 0) {
                 currentBuild.result = "FAILURE"
             }
-            
+
+            sh "${SCP} ${SSH_HOST_SPEC}:${filename} ${filename}"
             // result = sh (
             //    returnStdout: true,
             //    script: "${SSH} bin/run_demo.py -t demos/${DEMO_NAME}"
