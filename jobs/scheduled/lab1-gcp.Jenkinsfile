@@ -112,7 +112,7 @@ node(TARGET_NODE) {
         )
 
         copyArtifacts(
-            projectName: 'kubevirt/aws-demo-test',
+            projectName: 'kubevirt/gcp-demo-test',
             selector: specific("${demo.number}")
         )
 
