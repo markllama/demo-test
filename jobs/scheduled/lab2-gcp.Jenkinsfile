@@ -72,50 +72,55 @@ properties(
 // NOTIFY_EMAIL_FAIL
 //
 node(TARGET_NODE) {
-    stage("run lab2 on GCP") {
-        demo = build(
-            job: "kubevirt/gcp-demo-test",
-            propagate: false,
-            parameters: [
-                [
-                    name: "TARGET_NODE",
-                    value: TARGET_NODE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: "DEMO_NAME",
-                    value: DEMO_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: "DEMO_GIT_REPO",
-                    value: DEMO_GIT_REPO,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: "DEMO_GIT_BRANCH",
-                    value: DEMO_GIT_BRANCH,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: "DEMO_ROOT",
-                    value: DEMO_ROOT,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: "NOTIFY_EMAIL_PASS",
-                    value: NOTIFY_EMAIL_PASS,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: "NOTIFY_EMAIL_FAIL",
-                    value: NOTIFY_EMAIL_FAIL,
-                    $class: 'StringParameterValue'
+
+    try {
+        stage("run lab2 on GCP") {
+            demo = build(
+                job: "kubevirt/gcp-demo-test",
+                propagate: false,
+                parameters: [
+                    [
+                        name: "TARGET_NODE",
+                        value: TARGET_NODE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: "DEMO_NAME",
+                        value: DEMO_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: "DEMO_GIT_REPO",
+                        value: DEMO_GIT_REPO,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: "DEMO_GIT_BRANCH",
+                        value: DEMO_GIT_BRANCH,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: "DEMO_ROOT",
+                        value: DEMO_ROOT,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: "NOTIFY_EMAIL_PASS",
+                        value: NOTIFY_EMAIL_PASS,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: "NOTIFY_EMAIL_FAIL",
+                        value: NOTIFY_EMAIL_FAIL,
+                        $class: 'StringParameterValue'
+                    ]
                 ]
-            ]
 
-        )
+            )
 
+
+        }
+    } finally {
         copyArtifacts(
             projectName: 'kubevirt/gcp-demo-test',
             selector: specific("${demo.number}")
@@ -125,6 +130,5 @@ node(TARGET_NODE) {
 
         currentBuild.displayName = "lab2@gcp ${demo.displayName}"
         currentBuild.result = demo.result
-
     }
 }
