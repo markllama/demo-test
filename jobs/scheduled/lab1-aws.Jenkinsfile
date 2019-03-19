@@ -142,14 +142,16 @@ stage("run lab1 on AWS") {
         ]
 
     )
-)
 
-copyArtifacts(
-    projectName: 'kubevirt/aws-demo-test',
-    selector: specific("${demo.number}")
-)
+    copyArtifacts(
+        projectName: 'kubevirt/aws-demo-test',
+        selector: specific("${demo.number}")
+    )
 
-archiveArtifacts artifacts: "demo-test-result-*.txt"
+    archiveArtifacts artifacts: "demo-test-result-*.txt"
 
-currentBuild.displayName = "lab1 @ ${demo.displayName}"
-currentBuild.result = demo.result
+    currentBuild.displayName = "lab1 @ ${demo.displayName}"
+    currentBuild.result = demo.result
+
+}
+
