@@ -84,7 +84,7 @@ properties(
 // NOTIFY_EMAIL_FAIL
 //
 
-step("run lab1 on AWS") {
+stage("run lab1 on AWS") {
     demo = build(
         job: "kubevirt/aws-demo-test",
         propagate: false,
@@ -141,16 +141,15 @@ step("run lab1 on AWS") {
             ]
         ]
 
-
     )
-
-    copyArtifacts(
-        projectName: 'kubevirt/aws-demo-test',
-        selector: specific("${demo.number}")
-    )
-
-    archiveArtifacts artifacts: "demo-test-result-*.txt"
-
-    currentBuild.displayName = "lab1 @ ${demo.displayName}"
-    currentBuild.result = demo.result
 )
+
+copyArtifacts(
+    projectName: 'kubevirt/aws-demo-test',
+    selector: specific("${demo.number}")
+)
+
+archiveArtifacts artifacts: "demo-test-result-*.txt"
+
+currentBuild.displayName = "lab1 @ ${demo.displayName}"
+currentBuild.result = demo.result
