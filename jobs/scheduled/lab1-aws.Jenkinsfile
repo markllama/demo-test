@@ -12,6 +12,12 @@ properties(
             $class: 'ParametersDefinitionProperty',
             parameterDefinitions: [
                 [
+                    name: 'TARGET_NODE',
+                    description: 'Jenkins agent node',
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: 'awscli'
+                ],
+                [
                     name: 'INSTANCE_KEYPAIR_NAME',
                     description: "AWS SSH Keypair Name",
                     $class: 'hudson.model.StringParameterDefinition',
@@ -84,74 +90,75 @@ properties(
 // NOTIFY_EMAIL_FAIL
 //
 
-stage("run lab1 on AWS") {
-    demo = build(
-        job: "kubevirt/aws-demo-test",
-        propagate: false,
-        parameters: [
-            [
-                name: 'OWNER_NUMBER',
-                value: AWS_OWNER_NUMBER,
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: 'AWS_CREDENTIALS',
-                value: 'aws-credentials',
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: 'INSTANCE_KEYPAIR_NAME',
-                value: 'kubevirt-demos',
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: 'INSTANCE_SSH_PRIVATE_KEY',
-                value: 'kubevirt-demos',
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: "DEMO_NAME",
-                value: DEMO_NAME,
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: "DEMO_GIT_REPO",
-                value: DEMO_GIT_REPO,
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: "DEMO_GIT_BRANCH",
-                value: DEMO_GIT_BRANCH,
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: "DEMO_ROOT",
-                value: DEMO_ROOT,
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: "NOTIFY_EMAIL_PASS",
-                value: NOTIFY_EMAIL_PASS,
-                $class: 'StringParameterValue'
-            ],
-            [
-                name: "NOTIFY_EMAIL_FAIL",
-                value: NOTIFY_EMAIL_FAIL,
-                $class: 'StringParameterValue'
+node(TARGET_NODE) {
+    stage("run lab1 on AWS") {
+        demo = build(
+            job: "kubevirt/aws-demo-test",
+            propagate: false,
+            parameters: [
+                [
+                    name: 'OWNER_NUMBER',
+                    value: AWS_OWNER_NUMBER,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: 'AWS_CREDENTIALS',
+                    value: 'aws-credentials',
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: 'INSTANCE_KEYPAIR_NAME',
+                    value: 'kubevirt-demos',
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: 'INSTANCE_SSH_PRIVATE_KEY',
+                    value: 'kubevirt-demos',
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "DEMO_NAME",
+                    value: DEMO_NAME,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "DEMO_GIT_REPO",
+                    value: DEMO_GIT_REPO,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "DEMO_GIT_BRANCH",
+                    value: DEMO_GIT_BRANCH,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "DEMO_ROOT",
+                    value: DEMO_ROOT,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "NOTIFY_EMAIL_PASS",
+                    value: NOTIFY_EMAIL_PASS,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "NOTIFY_EMAIL_FAIL",
+                    value: NOTIFY_EMAIL_FAIL,
+                    $class: 'StringParameterValue'
+                ]
             ]
-        ]
 
-    )
+        )
 
-    copyArtifacts(
-        projectName: 'kubevirt/aws-demo-test',
-        selector: specific("${demo.number}")
-    )
+        // copyArtifacts(
+        //     projectName: 'kubevirt/aws-demo-test',
+        //     selector: specific("${demo.number}")
+        // )
 
-    archiveArtifacts artifacts: "demo-test-result-*.txt"
+        // archiveArtifacts artifacts: "demo-test-result-*.txt"
 
-    currentBuild.displayName = "lab1 @ ${demo.displayName}"
-    currentBuild.result = demo.result
+        currentBuild.displayName = "lab1 @ ${demo.displayName}"
+        currentBuild.result = demo.result
 
+    }
 }
-
