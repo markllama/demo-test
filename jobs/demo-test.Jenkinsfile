@@ -131,8 +131,6 @@ node(TARGET_NODE) {
 
     archiveArtifacts artifacts: "demo-test-result-*.txt"
 
-
-
     if (!persist) {
         cleanWs()
         deleteDir()
