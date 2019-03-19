@@ -15,7 +15,7 @@ properties(
                     name: 'TARGET_NODE',
                     description: 'Jenkins agent node',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: 'awscli'
+                    defaultValue: 'gcloud'
                 ],
                 [
                     name: 'DEMO_NAME',
@@ -77,6 +77,11 @@ node(TARGET_NODE) {
             job: "kubevirt/gcp-demo-test",
             propagate: false,
             parameters: [
+                [
+                    name: "TARGET_NODE",
+                    value: TARGET_NODE,
+                    $class: 'StringParameterValue'
+                ],                
                 [
                     name: "DEMO_NAME",
                     value: DEMO_NAME,

@@ -97,6 +97,11 @@ node(TARGET_NODE) {
             propagate: false,
             parameters: [
                 [
+                    name: "TARGET_NODE",
+                    value: TARGET_NODE,
+                    $class: 'StringParameterValue'
+                ],                
+                [
                     name: 'OWNER_NUMBER',
                     value: AWS_OWNER_NUMBER,
                     $class: 'StringParameterValue'
