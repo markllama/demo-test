@@ -129,16 +129,30 @@ node(TARGET_NODE) {
 
         stage("execute test") {
             echo "execute test"
-            result = sh (
-                returnStdout: true,
-                script: "${SSH} bin/run_demo.py -t demos/${DEMO_NAME}"
+
+            def filename = "demo-test-result-${demo_name}.txt"
+
+            return_code = sh(
+                returnStatus: true,
+                script: "${SSH} scripts/run_demo.py -d -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename}"
             )
+
+            if (return_code != 0) {
+                currentBuild.result = "FAILURE"
+            }
+            
+            // result = sh (
+            //    returnStdout: true,
+            //    script: "${SSH} bin/run_demo.py -t demos/${DEMO_NAME}"
+            // )
+
+            def result = readFile :file filename
             echo "result = --- \n${result}\n---"
             
-            writeFile(
-                file: "demo-test-result-${demo_name}.txt",
-                text: "${result}"
-            )
+            // writeFile(
+            //    file: "demo-test-result-${demo_name}.txt",
+            //    text: "${result}"
+            // )
         }
     }
 
