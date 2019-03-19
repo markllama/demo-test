@@ -2,10 +2,10 @@ properties(
     [
         buildDiscarder(
             logRotator(
-                artifactDaysToKeepStr: '',
-                artifactNumToKeepStr: '',
-                daysToKeepStr: '',
-                numToKeepStr: '360')
+                artifactDaysToKeepStr: '30',
+                artifactNumToKeepStr: '10',
+                daysToKeepStr: '30',
+                numToKeepStr: '10')
         ),
         disableConcurrentBuilds(),
         [
@@ -150,14 +150,14 @@ node(TARGET_NODE) {
 
         )
 
-        // copyArtifacts(
-        //     projectName: 'kubevirt/aws-demo-test',
-        //     selector: specific("${demo.number}")
-        // )
+        copyArtifacts(
+            projectName: 'kubevirt/aws-demo-test',
+            selector: specific("${demo.number}")
+        )
 
-        // archiveArtifacts artifacts: "demo-test-result-*.txt"
+        archiveArtifacts artifacts: "demo-test-result-*.txt"
 
-        currentBuild.displayName = "lab1 @ ${demo.displayName}"
+        currentBuild.displayName = "lab1@aws ${demo.displayName}"
         currentBuild.result = demo.result
 
     }
