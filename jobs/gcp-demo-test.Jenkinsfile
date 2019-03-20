@@ -5,9 +5,9 @@ properties(
         disableConcurrentBuilds(),
         buildDiscarder(
             logRotator(
-                artifactDaysToKeepStr: '',
-                artifactNumToKeepStr: '',
-                daysToKeepStr: '',
+                artifactDaysToKeepStr: '10',
+                artifactNumToKeepStr: '5',
+                daysToKeepStr: '10',
                 numToKeepStr: '5')),
         [
             $class: 'ParametersDefinitionProperty',
@@ -249,6 +249,16 @@ node(TARGET_NODE) {
                         name: 'DEMO_ROOT',
                         value: DEMO_ROOT,
                         $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'PERSIST',
+                        value: PERSIST,
+                        $class: 'BooleanParameterValue',
+                    ],
+                    [
+                        name: 'DEBUG',
+                        value: DEBUG,
+                        $class: 'BooleanParameterValue',
                     ]
                 ]
             )
@@ -334,7 +344,7 @@ Demo URL       : ${executeJob.absoluteUrl}
                     ],
                     [
                         name: 'PERSIST',
-                        value: true,
+                        value: PERSIST,
                         $class: 'BooleanParameterValue',
                     ],
                     [
