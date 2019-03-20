@@ -387,7 +387,7 @@ Demo URL       : ${executeJob.absoluteUrl}
         to: NOTIFY_EMAIL_PASS,
         from: "kubevirt-demo-test@redhat.com",
         replyTo: "mlamouri+jenkins@redhat.com",
-        subject: "[demo-test-gcp] PASS",
+        subject: "[gcp-demo-test] PASS",
         body: body
     )
 } else {
