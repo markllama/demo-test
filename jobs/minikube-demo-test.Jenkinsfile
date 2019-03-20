@@ -357,7 +357,7 @@ node(TARGET_NODE) {
 
                 get_minikube()
                 start_minikube()
-                wait_for_pods(pod_count: 9, namespace: 'kube-system')
+                wait_for_pods(9, 'kube-system')
 
                 // enable_weave_cni()
             }
