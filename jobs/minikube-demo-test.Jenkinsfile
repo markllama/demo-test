@@ -232,7 +232,7 @@ def start_minikube() {
 //
 // The kubevirt get pods JSON is an a
 //
-def wait_for_pods(pod_count: 9, namespace: "kube-system") {
+def wait_for_pods(int pod_count = 9, String namespace = "kube-system") {
 
     all_running = false
     tries = 0
