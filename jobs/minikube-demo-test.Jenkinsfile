@@ -296,6 +296,8 @@ def install_kubevirt() {
 
     // install the kubevirt operator
     sh "kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/kubevirt-operator.yaml"
+
+    // wait for operator running
     
     // enable virt emulation
     sh "kubectl create configmap -n kubevirt kubevirt-config --from-literal debug.useEmulation=true"
@@ -304,6 +306,7 @@ def install_kubevirt() {
     sh "kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/kubevirt-cr.yaml"
 
     // wait for pods to initialize
+
 }
 
 node(TARGET_NODE) {
@@ -401,7 +404,7 @@ node(TARGET_NODE) {
 
                 return_code = sh (
                     returnStatus: true,
-                    script: "scripts/run_demo.py -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename} 2>&1"
+                    script: "scripts/run_demo.py -d -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename} 2>&1"
                 )
 
                 if (return_code != 0) {
