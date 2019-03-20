@@ -366,7 +366,7 @@ node(TARGET_NODE) {
                 if (KUBEVIRT_VERSION != 'none') {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
-                    // wait_for_pods(pod_count=10, namespace="kubevirt")
+                    wait_for_pods(6, namespace="kubevirt")
                 } else {
                     echo "kubevirt installation disabled"
                 }
