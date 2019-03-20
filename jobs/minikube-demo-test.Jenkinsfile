@@ -399,9 +399,9 @@ node(TARGET_NODE) {
                 def filename = "demo-test-result-${demo_name}.txt"
 
 
-                returnCode = sh (
+                return_code = sh (
                     returnStatus: true,
-                    script: "scripts/run_demo.py -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename}"
+                    script: "scripts/run_demo.py -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename} 2>&1"
                 )
 
                 if (return_code != 0) {
