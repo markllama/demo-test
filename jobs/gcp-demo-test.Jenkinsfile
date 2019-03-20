@@ -307,53 +307,57 @@ Demo URL       : ${executeJob.absoluteUrl}
     } finally {
 
         stage("teardown instance") {
-            echo "Deleting instance"
-            teardownJob = build(
-                job: 'gcp-teardown',
-                propagate: true,
-                parameters: [
-                    [
-                        name: 'TARGET_NODE',
-                        value: TARGET_NODE,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'GCP_PROJECT',
-                        value: GCP_PROJECT,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'GCP_SERVICE_ACCOUNT',
-                        value: GCP_SERVICE_ACCOUNT,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'GCP_KEY_FILE',
-                        value: GCP_KEY_FILE,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'GCP_ZONE',
-                        value: GCP_ZONE,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'GCP_INSTANCE_NAME',
-                        value: GCP_INSTANCE_NAME,
-                        $class: 'StringParameterValue'
-                    ],
-                    [
-                        name: 'PERSIST',
-                        value: PERSIST,
-                        $class: 'BooleanParameterValue',
-                    ],
-                    [
-                        name: 'DEBUG',
-                        value: DEBUG,
-                        $class: 'BooleanParameterValue',
+            if (!persist) {
+                echo "Deleting instance"
+                teardownJob = build(
+                    job: 'gcp-teardown',
+                    propagate: true,
+                    parameters: [
+                        [
+                            name: 'TARGET_NODE',
+                            value: TARGET_NODE,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'GCP_PROJECT',
+                            value: GCP_PROJECT,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'GCP_SERVICE_ACCOUNT',
+                            value: GCP_SERVICE_ACCOUNT,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'GCP_KEY_FILE',
+                            value: GCP_KEY_FILE,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'GCP_ZONE',
+                            value: GCP_ZONE,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'GCP_INSTANCE_NAME',
+                            value: GCP_INSTANCE_NAME,
+                            $class: 'StringParameterValue'
+                        ],
+                        [
+                            name: 'PERSIST',
+                            value: PERSIST,
+                            $class: 'BooleanParameterValue',
+                        ],
+                        [
+                            name: 'DEBUG',
+                            value: DEBUG,
+                            $class: 'BooleanParameterValue',
+                        ]
                     ]
-                ]
-            )
+                )
+            } else {
+                echo "PERSIST = true - GCP instance teardown disabled"
+            }
         }
     }
 
