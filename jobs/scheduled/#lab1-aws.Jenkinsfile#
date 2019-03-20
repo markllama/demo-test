@@ -39,19 +39,19 @@ properties(
                     name: 'DEMO_NAME',
                     description: "The username for SSH to the instance",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: 'lab2'
+                    defaultValue: 'lab1'
                 ],
                 [
                     name: "DEMO_GIT_REPO",
                     description: "Where to find the demo page and test code",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "https://github.com/markllama/kubevirt.github.io.git"
+                    defaultValue: "https://github.com/kubevirt/kubevirt.github.io.git"
                 ],
                 [
                     name: "DEMO_GIT_BRANCH",
                     description: "The branch that contains the of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "labs"
+                    defaultValue: "master"
                 ],
                 [
                     name: "DEMO_ROOT",
@@ -91,7 +91,7 @@ properties(
 //
 
 node(TARGET_NODE) {
-    stage("run lab2 on AWS") {
+    stage("run lab1 on AWS") {
         demo = build(
             job: "kubevirt/aws-demo-test",
             propagate: false,
@@ -133,7 +133,7 @@ node(TARGET_NODE) {
                 ],
                 [
                     name: "DEMO_GIT_BRANCH",
-                    value: DEMO_GIT_BRANCH,
+                    value: DEMO_GIT_BRANCH, 
                     $class: 'StringParameterValue'
                 ],
                 [
@@ -162,7 +162,7 @@ node(TARGET_NODE) {
 
         archiveArtifacts artifacts: "demo-test-result-*.txt"
 
-        currentBuild.displayName = "lab2@aws ${demo.displayName}"
+        currentBuild.displayName = "lab1@aws ${demo.displayName}"
         currentBuild.result = demo.result
 
     }
