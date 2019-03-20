@@ -393,7 +393,7 @@ node(TARGET_NODE) {
             }
             
             stage("run demo") {
-                echo "preparing to run ${DEMO_NAME} from ${DEMO_REPO}:${DEMO_BRANCH}"
+                echo "preparing to run ${DEMO_NAME} from ${DEMO_GIT_REPO}:${DEMO_GIT_BRANCH}"
                 
             }
             
