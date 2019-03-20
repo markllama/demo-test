@@ -310,8 +310,7 @@ node(TARGET_NODE) {
     //sh("echo I ran")
     //echo "I ran"
 
-    // This might not be needed here
-    // checkout scm
+    checkout scm
 
     //stage("verify virtualization") {
     //    check_virt_kvm()
@@ -393,19 +392,24 @@ node(TARGET_NODE) {
             }
             
             stage("run demo") {
-                echo "preparing to run ${DEMO_NAME} from ${DEMO_GIT_REPO}:${DEMO_GIT_BRANCH}"
+                echo "running ${DEMO_NAME} from ${DEMO_GIT_REPO}:${DEMO_GIT_BRANCH}"
                 
             }
             
         } finally {
-            if (!persist) {
-                try {
-                    clean_minikube()
-                } catch (err) {
-                    echo "error cleaning minikube"
+            stage("teardown minikube") {
+                if (!persist) {
+                    echo "Cleaning up minikube on agent"
+                    try {
+                        clean_minikube()
+                    } catch (err) {
+                        echo "error cleaning minikube"
+                    }
+                    cleanWs()
+                    deleteDir()
+                } else {
+                    echo "PERSIST = true - cleanup disabled"
                 }
-                cleanWs()
-                deleteDir()
             }
         }
     }
