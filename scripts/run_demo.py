@@ -163,8 +163,8 @@ def side_effect_step(t, test_dir):
     try:
         output = subprocess.check_output([shell, os.path.join(test_dir, t['filename'])], stderr=subprocess.STDOUT)
         
-    except subprocess.CalledProcessError as e:
-        logging.error("Step '{}' failed: status: {} - output\n{}".format(t['name'], e.returncode. e.output))
+    except subprocess.CalledProcessError as error:
+        logging.error("Step '{}' FAILED: error = {}".format(t['name'], error))
         return False
 
     logging.debug("Step '{}': output:\n{}".format(t['name'], output))
@@ -173,8 +173,8 @@ def side_effect_step(t, test_dir):
     if "test" in t.keys() and t['test'] != False:
         try: 
             output = subprocess.check_output([t['test']], shell=True, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as e:
-            logging.error("POST CHECK FOR {} FAILED: STATUS: {}".format(t['name'], e.returncode))
+        except subprocess.CalledProcessError as error:
+            logging.error("POST CHECK FOR {} FAILED: STATUS: {}".format(t['name'], error))
             return False
 
     return True
