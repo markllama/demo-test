@@ -291,6 +291,8 @@ def install_kubevirt() {
 
     sh "curl --silent -L -o ${WORKSPACE}/bin/virtctl https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/virtctl-v${KUBEVIRT_VERSION}-linux-amd64"
     sh "chmod a+x ${WORKSPACE}/bin/virtctl"
+    // just for demos that want it in CWD
+    sh "ln -s bin/virtctl ."
 
     // install the kubevirt operator
     sh "kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/kubevirt-operator.yaml"
@@ -393,11 +395,28 @@ node(TARGET_NODE) {
             
             stage("run demo") {
                 echo "running ${DEMO_NAME} from ${DEMO_GIT_REPO}:${DEMO_GIT_BRANCH}"
-                
+
+                def filename = "demo-test-result-${demo_name}.txt"
+
+
+                returnCode = sh (
+                    returnStatus: true,
+                    script: "scripts/run_demo.py -t demos/${DEMO_ROOT}/${DEMO_NAME} -o ${filename}"
+                )
+
+                if (return_code != 0) {
+                    currentBuild.result = "FAILURE"
+                }
+
+                def result = readFile file: filename
+                echo "result = --- \n${result}\n---"
             }
             
         } finally {
             stage("teardown minikube") {
+
+                archiveArtifacts artifacts: "demo-test-result-*.txt"
+
                 if (!persist) {
                     echo "Cleaning up minikube on agent"
                     try {
