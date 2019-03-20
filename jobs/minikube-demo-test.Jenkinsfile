@@ -232,19 +232,19 @@ def start_minikube() {
 //
 // The kubevirt get pods JSON is an a
 //
-def wait_for_system_pods() {
+def wait_for_pods(pod_count: 9, namespace: "kube-system") {
 
     all_running = false
     tries = 0
     while (!all_running && tries < 30) {
         def poddataJson = sh(
             returnStdout: true,
-            script: "${WORKSPACE}/bin/kubectl get pods --namespace kube-system -o json | jq '[ .items[] | { \"name\": .metadata.name, \"phase\": .status.phase }]'"
+            script: "${WORKSPACE}/bin/kubectl get pods --namespace ${namespace} -o json | jq '[ .items[] | { \"name\": .metadata.name, \"phase\": .status.phase }]'"
         )
 
         def poddata = readJSON text: poddataJson
 
-        if (poddata.size() == 9 && poddata.every { p -> p.phase == "Running"}) {
+        if (poddata.size() == pod_count && poddata.every { p -> p.phase == "Running"}) {
             all_running = true
         }
         
@@ -357,7 +357,7 @@ node(TARGET_NODE) {
 
                 get_minikube()
                 start_minikube()
-                wait_for_system_pods()
+                wait_for_pods(pod_count=9, namespace='kube-system')
 
                 // enable_weave_cni()
             }
@@ -366,6 +366,7 @@ node(TARGET_NODE) {
                 if (KUBEVIRT_VERSION != 'none') {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
+                    // wait_for_pods(pod_count=10, namespace="kubevirt")
                 } else {
                     echo "kubevirt installation disabled"
                 }
