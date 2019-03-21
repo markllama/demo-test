@@ -217,45 +217,6 @@ node(TARGET_NODE) {
                 ]
             )
 
-            copyArtifacts(
-                projectName: 'demo-test-remote',
-                selector: specific("${executeJob.number}")
-            )
-        }
-    } catch (error) {
-        // report demo failure
-        if (NOTIFY_EMAIL_FAIL != '') {
-            echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
-            // Compose the body of a FAIL email
-            // Start time
-            // End time
-            // Duration
-            // Stdout
-            startTime = new Date(currentBuild.startTimeInMillis)
-            demoStartTime = new Date(executeJob.startTimeInMillis)
-            
-            body = """
-Name           : aws-demo-test ${currentBuild.number}
-Start Time     : ${startTime.toString()}
-Total Duration : ${currentBuild.durationString}
-Total Status   : ${currentBuild.currentResult}
-Total URL      : ${currentBuild.absoluteUrl}
-
-Demo Name      : ${DEMO_NAME}
-Demo Start Time: ${demoStartTime}
-Demo Duration  : ${executeJob.durationString}
-Demo Status    : ${executeJob.currentResult}
-Demo URL       : ${executeJob.absoluteUrl}
-
-"""
-
-            mail(
-                to: NOTIFY_EMAIL_FAIL,
-                from: "kubevirt-demo-test@redhat.com",
-                replyTo: "mlamouri+jenkins@redhat.com",
-                subject: "[aws-demo-test] FAIL",
-                body: body
-            )
         }
     } finally {
 
@@ -305,6 +266,7 @@ Demo URL       : ${executeJob.absoluteUrl}
 
 }
 
+
 currentBuild.result = executeJob.currentResult
 
 if (executeJob.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
@@ -339,6 +301,42 @@ Demo URL       : ${executeJob.absoluteUrl}
         subject: "[aws-demo-test] PASS",
         body: body
     )
+} else if (executeJob.currentResult == 'FAILURE' && NOTIFY_EMAIL_FAIL != '') {
+    // report demo failure
+    if (NOTIFY_EMAIL_FAIL != '') {
+        echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
+        // Compose the body of a FAIL email
+        // Start time
+        // End time
+        // Duration
+        // Stdout
+        startTime = new Date(currentBuild.startTimeInMillis)
+        demoStartTime = new Date(executeJob.startTimeInMillis)
+        
+        body = """
+Name           : aws-demo-test ${currentBuild.number}
+Start Time     : ${startTime.toString()}
+Total Duration : ${currentBuild.durationString}
+Total Status   : ${currentBuild.currentResult}
+Total URL      : ${currentBuild.absoluteUrl}
+
+Demo Name      : ${DEMO_NAME}
+Demo Start Time: ${demoStartTime}
+Demo Duration  : ${executeJob.durationString}
+Demo Status    : ${executeJob.currentResult}
+Demo URL       : ${executeJob.absoluteUrl}
+
+"""
+
+        mail(
+            to: NOTIFY_EMAIL_FAIL,
+            from: "kubevirt-demo-test@redhat.com",
+            replyTo: "mlamouri+jenkins@redhat.com",
+            subject: "[aws-demo-test] FAIL",
+            body: body
+        )
+    }
+    
 } else {
     echo "No recipients for PASS email provided"
 }
