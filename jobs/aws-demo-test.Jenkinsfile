@@ -220,6 +220,11 @@ node(TARGET_NODE) {
         }
     } finally {
 
+        copyArtifacts(
+            projectName: 'demo-test-remote',
+            selector: specific("${executeJob.number}")
+        )
+
         stage("teardown instance") {
 
             echo "AWS_INSTANCE_ID = ${AWS_INSTANCE_ID}"
@@ -269,7 +274,7 @@ node(TARGET_NODE) {
 
 currentBuild.result = executeJob.currentResult
 
-if (executeJob.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
+if (currentBuild.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
     echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
     // Compose the body of a PASS email
     // Start time
@@ -301,7 +306,7 @@ Demo URL       : ${executeJob.absoluteUrl}
         subject: "[aws-demo-test] PASS",
         body: body
     )
-} else if (executeJob.currentResult == 'FAILURE' && NOTIFY_EMAIL_FAIL != '') {
+} else if (currentBuild.currentResult == 'FAILURE' && NOTIFY_EMAIL_FAIL != '') {
     // report demo failure
     if (NOTIFY_EMAIL_FAIL != '') {
         echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
