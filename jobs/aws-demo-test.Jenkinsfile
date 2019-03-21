@@ -168,13 +168,11 @@ node(TARGET_NODE) {
         AWS_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
     }
 
-    def executeJob
-    
     try {
         stage("execute demo") {
             executeJob = build(
                 job: "demo-test-remote",
-                propagate: true,
+                propagate: false,
                 parameters: [
                     [
                         name: 'TARGET_NODE',
