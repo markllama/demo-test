@@ -119,17 +119,17 @@ node(TARGET_NODE) {
                 ],
                 [
                     name: "VIRT_DRIVER",
-                    value: TARGET_NODE,
+                    value: VIRT_DRIVER,
                     $class: 'StringParameterValue'
                 ],
                 [
                     name: "VIRT_DRIVER_VERSION",
-                    value: TARGET_NODE,
+                    value: VIRT_DRIVER_VERSION,
                     $class: 'StringParameterValue'
                 ],
                 [
                     name: "KUBEVIRT_VERSION",
-                    value: TARGET_NODE,
+                    value: KUBEVIRT_VERSION,
                     $class: 'StringParameterValue'
                 ],
                 [
