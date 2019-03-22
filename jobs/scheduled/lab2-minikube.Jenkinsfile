@@ -50,7 +50,7 @@ properties(
                     name: 'DEMO_NAME',
                     description: "The name of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: 'lab1'
+                    defaultValue: 'lab2'
                 ],
                 [
                     name: "DEMO_GIT_REPO",
