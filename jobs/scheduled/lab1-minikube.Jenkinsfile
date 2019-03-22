@@ -18,6 +18,35 @@ properties(
                     defaultValue: 'awscli'
                 ],
                 [
+                    name: 'MINIKUBE_VERSION',
+                    description: 'What version of minikube to use (no v prefix!)',
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: '0.35.0'
+                ],
+                [
+                    name: 'VIRT_DRIVER',
+                    description: 'Which virtualization driver to use',
+                    $class: 'hudson.model.ChoiceParameterDefinition',
+                    choices: [
+                        "kvm2",
+                        "kvm",
+                        "virtualbox"
+                    ].join("\n"),
+                    defaultValue: 'kvm2'
+                ],                
+                [
+                    name: 'VIRT_DRIVER_VERSION',
+                    description: 'What version of kvm driver to use (no v prefix!): defaults to MINIKUBE_VERSION',
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "0.31.0"
+                ],
+                [
+                    name: "KUBEVIRT_VERSION",
+                    description: "Version of kubevirt to install (or 'none')",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "0.15.0"
+                ],
+                [
                     name: 'DEMO_NAME',
                     description: "The username for SSH to the instance",
                     $class: 'hudson.model.StringParameterDefinition',
@@ -82,7 +111,27 @@ node(TARGET_NODE) {
                     name: "TARGET_NODE",
                     value: TARGET_NODE,
                     $class: 'StringParameterValue'
-                ],                
+                ],
+                [
+                    name: "MINIKUBE_VERSION",
+                    value: MINIKUBE_VERSION,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "VIRT_DRIVER",
+                    value: TARGET_NODE,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "VIRT_DRIVER_VERSION",
+                    value: TARGET_NODE,
+                    $class: 'StringParameterValue'
+                ],
+                [
+                    name: "KUBEVIRT_VERSION",
+                    value: TARGET_NODE,
+                    $class: 'StringParameterValue'
+                ],
                 [
                     name: "DEMO_NAME",
                     value: DEMO_NAME,
