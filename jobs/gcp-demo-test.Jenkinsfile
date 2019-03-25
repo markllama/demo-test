@@ -133,75 +133,111 @@ node(TARGET_NODE) {
     stage("create instance") {
         echo "Creating instance"
 
-        setupJob = build(
-            job: 'gcp-setup',
-            propagate: true,
-            parameters: [
-                [
-                    name: 'TARGET_NODE',
-                    value: TARGET_NODE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_PROJECT',
-                    value: GCP_PROJECT,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_SERVICE_ACCOUNT',
-                    value: GCP_SERVICE_ACCOUNT,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_KEY_FILE',
-                    value: GCP_KEY_FILE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_ZONE',
-                    value: GCP_ZONE,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_INSTANCE_NAME',
-                    value: GCP_INSTANCE_NAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_INSTANCE_USERNAME',
-                    value: GCP_INSTANCE_USERNAME,
-                    $class: 'StringParameterValue'
-                ],
-                [
-                    name: 'GCP_INSTANCE_PUBLIC_KEY_NAME',
-                    value: GCP_INSTANCE_PUBLIC_KEY_NAME,
-                    $class: 'StringParameterValue',
-                ],
-                [
-                    name: 'GCP_INSTANCE_PRIVATE_KEY_NAME',
-                    value: GCP_INSTANCE_PRIVATE_KEY_NAME,
-                    $class: 'StringParameterValue',
-                ],                
-                [
-                    name: 'PERSIST',
-                    value: true,
-                    $class: 'BooleanParameterValue',
-                ],
-                [
-                    name: 'DEBUG',
-                    value: DEBUG,
-                    $class: 'BooleanParameterValue',
+        try {
+            setupJob = build(
+                job: 'gcp-setup',
+                propagate: true,
+                parameters: [
+                    [
+                        name: 'TARGET_NODE',
+                        value: TARGET_NODE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_PROJECT',
+                        value: GCP_PROJECT,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_SERVICE_ACCOUNT',
+                        value: GCP_SERVICE_ACCOUNT,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_KEY_FILE',
+                        value: GCP_KEY_FILE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_ZONE',
+                        value: GCP_ZONE,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_INSTANCE_NAME',
+                        value: GCP_INSTANCE_NAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_INSTANCE_USERNAME',
+                        value: GCP_INSTANCE_USERNAME,
+                        $class: 'StringParameterValue'
+                    ],
+                    [
+                        name: 'GCP_INSTANCE_PUBLIC_KEY_NAME',
+                        value: GCP_INSTANCE_PUBLIC_KEY_NAME,
+                        $class: 'StringParameterValue',
+                    ],
+                    [
+                        name: 'GCP_INSTANCE_PRIVATE_KEY_NAME',
+                        value: GCP_INSTANCE_PRIVATE_KEY_NAME,
+                        $class: 'StringParameterValue',
+                    ],
+                    [
+                        name: 'PERSIST',
+                        value: true,
+                        $class: 'BooleanParameterValue',
+                    ],
+                    [
+                        name: 'DEBUG',
+                        value: DEBUG,
+                        $class: 'BooleanParameterValue',
+                    ]
                 ]
-            ]
-        )
+            )
 
-        currentBuild.displayName = "kubevirt-demos:${setupJob.displayName}"
-        currentBuild.result = setupJob.result
-        
-        // grab the returned INSTANCE_ID from the build job variables
-        GCP_INSTANCE_ID = setupJob.getBuildVariables().INSTANCE_ID
-        GCP_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
+            currentBuild.displayName = "kubevirt-demos:${setupJob.displayName}"
+            currentBuild.result = setupJob.result
+        } catch (e) {
+            // there was a problem building the instance
+            // report demo failure
+            if (NOTIFY_EMAIL_FAIL != '') {
+                echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
+                // Compose the body of a FAIL email
+                // Start time
+                // End time
+                // Duration
+                // Stdout
+                startTime = new Date(currentBuild.startTimeInMillis)
+                demoStartTime = new Date(executeJob.startTimeInMillis)
 
+                body = """
+Name           : gcp-demo-test ${currentBuild.number}
+Start Time     : ${startTime.toString()}
+Total Duration : ${currentBuild.durationString}
+Total Status   : ${currentBuild.currentResult}
+Total URL      : ${currentBuild.absoluteUrl}
+
+FAIL: error initializing instance
+
+"""
+
+                mail(
+                    to: NOTIFY_EMAIL_FAIL,
+                    from: "kubevirt-demo-test@redhat.com",
+                    replyTo: "mlamouri+jenkins@redhat.com",
+                    subject: "[gcp-demo-test] FAIL",
+                    body: body
+                )
+
+                error("Error initializing instance")
+            }
+
+            // grab the returned INSTANCE_ID from the build job variables
+            GCP_INSTANCE_ID = setupJob.getBuildVariables().INSTANCE_ID
+            GCP_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
+
+        }
     }
 
     try {
