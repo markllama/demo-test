@@ -209,7 +209,7 @@ node(TARGET_NODE) {
                 // Duration
                 // Stdout
                 startTime = new Date(currentBuild.startTimeInMillis)
-                demoStartTime = new Date(executeJob.startTimeInMillis)
+                demoStartTime = new Date(setupJob.startTimeInMillis)
 
                 body = """
 Name           : gcp-demo-test ${currentBuild.number}
@@ -219,6 +219,11 @@ Total Status   : ${currentBuild.currentResult}
 Total URL      : ${currentBuild.absoluteUrl}
 
 FAIL: error initializing instance
+
+Setup Start Time: ${demoStartTime}
+Setup Duration  : ${setupJob.durationString}
+Setup Status    : ${setupJob.currentResult}
+Setup Job URL   : ${setupJob.absoluteUrl}
 
 """
 
