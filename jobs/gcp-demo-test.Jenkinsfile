@@ -198,7 +198,7 @@ node(TARGET_NODE) {
         currentBuild.displayName = "kubevirt-demos:${setupJob.displayName}"
         currentBuild.result = setupJob.result
 
-        if (currentBuild.currentResult == "FAILED") {
+        if (currentBuild.currentResult == "FAILURE") {
             // there was a problem building the instance
             // report demo failure
             if (NOTIFY_EMAIL_FAIL != '') {
