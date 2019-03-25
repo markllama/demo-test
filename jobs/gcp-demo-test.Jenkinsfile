@@ -310,7 +310,8 @@ Setup Job URL   : ${setupJob.absoluteUrl}
             )
             
         }
-    } catch (error) {
+    } catch (err) {
+        echo "Error = ${err}"
         // report demo failure
         if (NOTIFY_EMAIL_FAIL != '') {
             echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
