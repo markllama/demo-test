@@ -136,7 +136,7 @@ node(TARGET_NODE) {
         try {
             setupJob = build(
                 job: 'gcp-setup',
-                propagate: true,
+                propagate: false,
                 parameters: [
                     [
                         name: 'TARGET_NODE',
