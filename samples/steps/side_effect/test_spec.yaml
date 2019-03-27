@@ -1,0 +1,12 @@
+test:
+  name: Side Effect Step Test
+  url: https://side-effect.demo-test.example.com
+  source: side-effect.md
+  steps:
+    - step: 1
+      name: Side Effect Step
+      filename: side_effect.sh
+      test: "test -f result.txt"
+      revert: "rm result.txt"
+  cleanup:
+    - rm result.txt

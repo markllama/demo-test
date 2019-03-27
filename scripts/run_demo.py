@@ -22,6 +22,7 @@ import pexpect
 import re
 import subprocess
 import sys
+import tempfile
 import time
 import yaml
 
@@ -130,11 +131,17 @@ def run_step(t, opts):
     if "expect" in t.keys():
         result = interactive_step(t, opts.test_dir)
 
-    if "test" in t.keys():
-        result = side_effect_step(t, opts.test_dir)
+#    if "test" in t.keys():
+#        result = side_effect_step(t, opts.test_dir)
 
     if "wait_for" in t.keys():
         result = wait_for_step(t)
+
+    if "variables" in t.keys() :
+        result = environment_step(t, opts.test_dir)
+
+    else:
+        result = side_effect_step(t, opts.test_dir)
 
     return result
 
@@ -208,6 +215,59 @@ def interactive_step(t, test_dir):
     return status
 
 
+def environment_step(t, test_dir):
+    
+    shell = t['shell'] if 'shell' in t.keys() else "sh"
+
+    q_format = 'echo {}_IS_PRESENT=$(env | grep -q {} ; echo $?)\necho {}=${{{}}}'
+
+    end_tag = "--- BEGIN RESULTS ---"
+    
+    # compose the list of variables and values to check before/after
+    var_queries=[q_format.format(v['name'], v['name'], v['name'], v['name']) for v in t['variables']]
+
+    # read script file
+    script_file = open(os.path.join(test_dir, t['filename']))
+    script_text = script_file.read()
+    script_file.close()
+
+    # write script file and var_queries to temp file
+    tdir_name = tempfile.mkdtemp()
+    tfile_name = os.path.join(tdir_name, "tmp_script.sh")
+
+    tfile = open(tfile_name, 'w')
+    tfile.write(script_text)
+    tfile.write('echo "{}"\n'.format(end_tag))
+    for qline in var_queries:
+        tfile.write(qline)
+
+    tfile.close()
+
+    tfile_info = os.stat(tfile_name)
+    
+    # execute temp file and collect the output
+    logging.debug("Step '{}' - executing {}".format(t['name'], t['filename']))
+    try:
+        output = subprocess.check_output([shell, tfile_name], stderr=subprocess.STDOUT)
+        
+    except subprocess.CalledProcessError as error:
+        logging.error("Step '{}' FAILED: error = {}, output={}".format(t['name'], error))
+        return False
+
+    output_lines = output.strip().split("\n")
+    test_lines = output_lines[output_lines.index(end_tag) + 1:]
+
+    print(test_lines)
+    # check each variable in the list for presence and value (if required)
+
+    
+    
+    os.remove(tfile_name)
+    os.rmdir(tdir_name)
+
+
+    return True
+
 def wait_for_step(t):
     """ """
     logging.info("Step '{}': waiting for {}".format(t['name'], t['wait_for']['poll']))
@@ -263,7 +323,10 @@ if __name__ == "__main__":
         logging.basicConfig(level=logging.INFO, stream=output_file)
 
     # Read the demo test spec into a test spec structure
-    spec = yaml.load(open(os.path.join(opts.test_dir, "test_spec.yaml")))    
+    spec = yaml.load(
+        open(os.path.join(opts.test_dir, "test_spec.yaml")),
+        Loader=yaml.FullLoader
+    )    
 
     #
     # Check preprequisites

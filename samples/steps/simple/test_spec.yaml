@@ -1,0 +1,12 @@
+test:
+  name: Simple Step
+  url: https://simple-step.demo-test.example.com
+  source: simple-step.md
+  steps:
+    - step: 1
+      name: A Simple Step
+      filename: simple_step.sh
+      test: "test -f result.txt"
+      revert: "rm result.txt"
+  cleanup:
+    - rm result.txt

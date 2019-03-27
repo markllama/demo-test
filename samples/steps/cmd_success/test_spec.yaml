@@ -1,0 +1,8 @@
+test:
+  name: Command Success Step Test
+  url: https://cmd-success.demo-test.example.com
+  source: cmd_success.md
+  steps:
+    - step: 1
+      name: Command Success Step
+      filename: cmd_success.sh

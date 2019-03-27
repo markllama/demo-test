@@ -1,0 +1,12 @@
+test:
+  name: Environment Setting Step Test
+  url: https://environment.demo-test.example.com
+  source: environment.md
+  steps:
+    - step: 1
+      name: Envronment Setting Test
+      filename: environment.sh
+      variables:
+        - name: "DEMO_TEST"
+          exists: True
+          value: "True"
