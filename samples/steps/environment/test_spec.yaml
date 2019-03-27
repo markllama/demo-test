@@ -8,5 +8,7 @@ test:
       filename: environment.sh
       variables:
         - name: "DEMO_TEST"
-          exists: True
+          # present: True
           value: "True"
+        - name: "IS_NOT_PRESENT"
+          present: False

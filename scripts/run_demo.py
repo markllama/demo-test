@@ -216,20 +216,27 @@ def interactive_step(t, test_dir):
 
 
 def environment_step(t, test_dir):
-    
-    shell = t['shell'] if 'shell' in t.keys() else "sh"
 
-    q_format = 'echo {}_IS_PRESENT=$(env | grep -q {} ; echo $?)\necho {}=${{{}}}'
-
-    end_tag = "--- BEGIN RESULTS ---"
+    # value != Null implies present == True
+    for var in t['variables']:
+        if 'value' in var.keys():
+            var['present'] = True
     
+    # -------------------------------------------------------------------------
+    # Generate the temporary test script
+    # -------------------------------------------------------------------------
     # compose the list of variables and values to check before/after
+    q_format = 'echo {}_IS_PRESENT=$(env | grep -q {} ; echo $?)\necho {}=${{{}}}\n'
     var_queries=[q_format.format(v['name'], v['name'], v['name'], v['name']) for v in t['variables']]
 
     # read script file
     script_file = open(os.path.join(test_dir, t['filename']))
     script_text = script_file.read()
     script_file.close()
+
+
+    # How will we know where the script output ends and the checks begin?
+    end_tag = "--- BEGIN RESULTS ---"
 
     # write script file and var_queries to temp file
     tdir_name = tempfile.mkdtemp()
@@ -244,29 +251,66 @@ def environment_step(t, test_dir):
     tfile.close()
 
     tfile_info = os.stat(tfile_name)
-    
+
+    # ------------------------------------------------------------------------
     # execute temp file and collect the output
+    # ------------------------------------------------------------------------
     logging.debug("Step '{}' - executing {}".format(t['name'], t['filename']))
     try:
+        shell = t['shell'] if 'shell' in t.keys() else "sh"
         output = subprocess.check_output([shell, tfile_name], stderr=subprocess.STDOUT)
         
     except subprocess.CalledProcessError as error:
         logging.error("Step '{}' FAILED: error = {}, output={}".format(t['name'], error))
         return False
 
+    # ------------------------------------------------------------------------
+    # Clean up the files, we're done with them
+    # ------------------------------------------------------------------------
+    os.remove(tfile_name)
+    os.rmdir(tdir_name)
+
+    # ------------------------------------------------------------------------
+    # Process the output to check the environment variables
+    # ------------------------------------------------------------------------
+
+    # extract just the env output
     output_lines = output.strip().split("\n")
     test_lines = output_lines[output_lines.index(end_tag) + 1:]
 
     print(test_lines)
+
+    # Convert eacn pair of lines into a variable status record
+    var_stats = {}
+    for line in test_lines:
+        present = None
+        (key, value) = line.split("=")
+        
+        if key.endswith("_IS_PRESENT"):
+            key = re.sub('_IS_PRESENT$', '', key)
+            present = value == '0'
+            var_stats[key] = {'present': present, 'value': None}
+        else:
+            var_stats[key]['value'] = value
+
+    # --------------------------------------------------------------------
     # check each variable in the list for presence and value (if required)
+    # --------------------------------------------------------------------
 
-    
-    
-    os.remove(tfile_name)
-    os.rmdir(tdir_name)
+    for var in t['variables']:
+        vname = var['name']
+        vstat = var_stats[vname]
+        vstat['pass'] = var['present'] == vstat['present']
 
+        # check value
+        if 'value' in var.keys():
+            vstat['pass'] = var['value'] == vstat['value']
+            
+    print(var_stats)
+    # Pass if all variables pass
+    result = reduce(lambda a, b: a and b, [v['pass'] for v in var_stats.values()])
+    return result
 
-    return True
 
 def wait_for_step(t):
     """ """
