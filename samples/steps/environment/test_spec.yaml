@@ -9,6 +9,11 @@ test:
       variables:
         - name: "DEMO_TEST"
           # present: True
-          value: "True"
+          value: "avalue"
         - name: "IS_NOT_PRESENT"
           present: False
+    - step: 2
+      name: Environment Value Test
+      filename: environment_after.sh
+      stdout: "avalue"
+      

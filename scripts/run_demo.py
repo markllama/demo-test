@@ -305,8 +305,12 @@ def environment_step(t, test_dir):
         # check value
         if 'value' in var.keys():
             vstat['pass'] = var['value'] == vstat['value']
-            
-    print(var_stats)
+
+    # Apply all values that are marked 'present' to the current environment
+    for k in var_stats.keys():
+        if var_stats[k]['present']:
+            os.environ[k] = var_stats[k]['value']
+
     # Pass if all variables pass
     result = reduce(lambda a, b: a and b, [v['pass'] for v in var_stats.values()])
     return result

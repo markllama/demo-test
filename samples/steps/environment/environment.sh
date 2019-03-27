@@ -1,1 +1,1 @@
-export DEMO_TEST=True
+export DEMO_TEST="avalue"
