@@ -371,10 +371,11 @@ if __name__ == "__main__":
         logging.basicConfig(level=logging.INFO, stream=output_file)
 
     # Read the demo test spec into a test spec structure
-    spec = yaml.load(
-        open(os.path.join(opts.test_dir, "test_spec.yaml")),
-        Loader=yaml.FullLoader
-    )    
+    #spec = yaml.load(
+    #    open(os.path.join(opts.test_dir, "test_spec.yaml")),
+    #    Loader=yaml.FullLoader
+    #)    
+    spec = yaml.load(open(os.path.join(opts.test_dir, "test_spec.yaml")))
 
     #
     # Check preprequisites
