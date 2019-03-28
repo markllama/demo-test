@@ -59,7 +59,7 @@ properties(
                     name: 'MINIKUBE_VERSION',
                     description: 'What version of minikube to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '0.33.1'
+                    defaultValue: '1.0.0'
                 ],
                 [
                     name: 'VIRT_DRIVER',

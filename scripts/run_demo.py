@@ -131,11 +131,11 @@ def run_step(t, opts):
     if "expect" in t.keys():
         result = interactive_step(t, opts.test_dir)
 
-    if "test" in t.keys():
+    # A side effect can be immediate or delayed
+    if "test" in t.keys() or "wait_for" in t.keys():
         result = side_effect_step(t, opts.test_dir)
-
-    if "wait_for" in t.keys():
-        result = wait_for_step(t)
+        if "wait_for" in t.keys():
+            result = wait_for_step(t)
 
     if "variables" in t.keys() :
         result = environment_step(t, opts.test_dir)
