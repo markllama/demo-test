@@ -123,16 +123,16 @@ def run_step(t, opts):
 
     cmd = open(os.path.join(opts.test_dir, t['filename'])).readlines()[0]
 
-    
     logging.debug("command: {}".format(cmd))
 
     result = None
-    
+
+    # Are these exclusive?
     if "expect" in t.keys():
         result = interactive_step(t, opts.test_dir)
 
-#    if "test" in t.keys():
-#        result = side_effect_step(t, opts.test_dir)
+    if "test" in t.keys():
+        result = side_effect_step(t, opts.test_dir)
 
     if "wait_for" in t.keys():
         result = wait_for_step(t)
@@ -140,8 +140,8 @@ def run_step(t, opts):
     if "variables" in t.keys() :
         result = environment_step(t, opts.test_dir)
 
-    else:
-        result = side_effect_step(t, opts.test_dir)
+#    else:
+#        result = side_effect_step(t, opts.test_dir)
 
     return result
 
@@ -261,7 +261,7 @@ def environment_step(t, test_dir):
         output = subprocess.check_output([shell, tfile_name], stderr=subprocess.STDOUT)
         
     except subprocess.CalledProcessError as error:
-        logging.error("Step '{}' FAILED: error = {}, output={}".format(t['name'], error))
+        logging.error("Step '{}' FAILED: error = {}".format(t['name'], error))
         return False
 
     # ------------------------------------------------------------------------
