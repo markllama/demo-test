@@ -383,14 +383,20 @@ if __name__ == "__main__":
         
     # Execute a single specified step or the complete sequence from start to end
     #
+    status = True
+
     logging.info("Demo Test '{}': BEGIN".format(spec['test']['name']))
     if opts.single_step > 0:
         status = run_step(spec['test']['steps'][opts.single_step-1], opts)
     else:
         for step in spec['test']['steps']:
-            status = run_step(step, opts)
-            if status == False:
-                break
+            if 'skip' in step and step['skip']:
+                logging.info("Skipping Step #{} - {}"
+                      .format(step['step'], step['name']))
+            else:
+                status = run_step(step, opts)
+                if status == False:
+                    break
 
     logging.info("Demo Test '{}': END".format(spec['test']['name']))
     if status == True:
