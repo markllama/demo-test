@@ -47,7 +47,7 @@ properties(
                     defaultValue: 'markllama'
                 ],
                 [
-                    name: 'SSH_KEY_ID',
+                   name: 'SSH_KEY_ID',
                     description: 'SSH credential id to use',
                     $class: 'hudson.model.ChoiceParameterDefinition',
                     choices: [
@@ -72,6 +72,12 @@ properties(
                     ].join("\n"),
                     defaultValue: 'kvm2'
                 ],                
+                [
+                    name: 'START_MINIKUBE',
+                    description: 'start minikube after installing',
+                    $class: 'hudson.model.BooleanParameterDefinition',
+                    defaultValue: true
+                ],
                 [
                     name: 'VIRT_DRIVER_VERSION',
                     description: 'What version of kvm driver to use (no v prefix!): defaults to MINIKUBE_VERSION',
@@ -125,6 +131,7 @@ properties(
     ]
 )
 
+start_minikube_enabled = START_MINIKUBE.toBoolean()
 persist = PERSIST.toBoolean()
 debug = DEBUG.toBoolean()
 if (VIRT_DRIVER_VERSION == "default") {
@@ -356,14 +363,15 @@ node(TARGET_NODE) {
                 }
 
                 get_minikube()
-                start_minikube()
-                wait_for_pods(9, 'kube-system')
-
+                if (start_minikube_enabled) {
+                    start_minikube()
+                    wait_for_pods(9, 'kube-system')
+                }
                 // enable_weave_cni()
             }
             
             stage("install kubevirt") {
-                if (KUBEVIRT_VERSION != 'none') {
+                if (KUBEVIRT_VERSION != 'none' && start_minikube_enabled) {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
                     wait_for_pods(6, namespace="kubevirt")
