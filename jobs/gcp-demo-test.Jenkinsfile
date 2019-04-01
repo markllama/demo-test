@@ -198,11 +198,13 @@ node(TARGET_NODE) {
         currentBuild.displayName = "kubevirt-demos:${setupJob.displayName}"
         currentBuild.result = setupJob.result
 
+        echo "Setup Result = ${setupJob.result}"
+
         if (currentBuild.currentResult == "FAILURE") {
             // there was a problem building the instance
             // report demo failure
             if (NOTIFY_EMAIL_FAIL != '') {
-                echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
+                echo "Setup Failure: Sending failure email to ${NOTIFY_EMAIL_FAIL}"
                 // Compose the body of a FAIL email
                 // Start time
                 // End time
@@ -238,13 +240,13 @@ Setup Job URL   : ${setupJob.absoluteUrl}
                 error("Error initializing instance")
             }
 
-            // grab the returned INSTANCE_ID from the build job variables
-            GCP_INSTANCE_ID = setupJob.getBuildVariables().INSTANCE_ID
-            GCP_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
-            echo "GCP_INSTANCE_ID: ${GCP_INSTANCE_ID}"
-            echo "GCP_INSTANCE_DNS_NAME: ${GCP_INSTANCE_DNS_NAME}"
-
         }
+
+        // grab the returned INSTANCE_ID from the build job variables
+        GCP_INSTANCE_ID = setupJob.getBuildVariables().INSTANCE_ID
+        GCP_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
+        echo "GCP_INSTANCE_ID: ${GCP_INSTANCE_ID}"
+        echo "GCP_INSTANCE_DNS_NAME: ${GCP_INSTANCE_DNS_NAME}"
     }
 
     try {
