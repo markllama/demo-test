@@ -347,7 +347,11 @@ def wait_for_step(t):
 def cleanup(script):
     for line in script:
         logging.debug("Cleanup Line: \n{}".format(line.split()))
-        subprocess.check_call(line.split())
+        try: 
+            subprocess.check_call(line.split())
+        except subprocess.CalledProcessError as e:
+            pass
+
     
 # ===========================================================================
 # MAIN
