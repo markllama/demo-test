@@ -259,6 +259,9 @@ def wait_for_pods(int pod_count = 9, String namespace = "kube-system") {
         sleep(5)
     }
 
+    if (!all_running) {
+        error("Failed to start ${pod_count} pods in namespace ${namespace}")
+    }
 }
 
 def enable_weave_cni() {
@@ -374,7 +377,7 @@ node(TARGET_NODE) {
                 if (KUBEVIRT_VERSION != 'none' && start_minikube_enabled) {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
-                    wait_for_pods(6, namespace="kubevirt")
+                    wait_for_pods(6, "kubevirt")
                 } else {
                     echo "kubevirt installation disabled"
                 }
