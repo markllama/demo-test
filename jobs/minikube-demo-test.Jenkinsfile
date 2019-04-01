@@ -323,7 +323,7 @@ def install_kubevirt() {
 
 node(TARGET_NODE) {
 
-    currentBuild.displayName = "${currentBuild.number} - minikube-${MINIKUBE_VERSION} / ${VIRT_DRIVER}"
+    currentBuild.displayName = "${currentBuild.number} - minikube-${MINIKUBE_VERSION} / ${VIRT_DRIVER} / ${DEMO_NAME}"
     //sh("echo I ran")
     //echo "I ran"
 
