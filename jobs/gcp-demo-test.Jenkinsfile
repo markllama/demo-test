@@ -241,7 +241,8 @@ Setup Job URL   : ${setupJob.absoluteUrl}
             // grab the returned INSTANCE_ID from the build job variables
             GCP_INSTANCE_ID = setupJob.getBuildVariables().INSTANCE_ID
             GCP_INSTANCE_DNS_NAME = setupJob.getBuildVariables().INSTANCE_PUBLIC_DNS_NAME
-            echo "GCP_INSTANCE_ID: ${GCP_INSTANCE_ID}\nGCP_INSTANCE_DNS_NAME: ${GCP_INSTANCE_DNS_NAME}"
+            echo "GCP_INSTANCE_ID: ${GCP_INSTANCE_ID}"
+            echo "GCP_INSTANCE_DNS_NAME: ${GCP_INSTANCE_DNS_NAME}"
 
         }
     }
