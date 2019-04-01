@@ -259,9 +259,11 @@ def wait_for_pods(int pod_count = 9, String namespace = "kube-system") {
         sleep(5)
     }
 
-    if (!all_running) {
+    if (all_running) {
+        echo "Confirmed ${pod_count} pods in namespace ${namespace}"
+    } else {
         error("Failed to start ${pod_count} pods in namespace ${namespace}")
-    }
+    } 
 }
 
 def enable_weave_cni() {
