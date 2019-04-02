@@ -50,7 +50,7 @@ properties(
                     name: 'DEMO_NAME',
                     description: "The name of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: 'lab1'
+                    defaultValue: 'quickstart_minikube'
                 ],
                 [
                     name: "DEMO_GIT_REPO",
@@ -62,7 +62,7 @@ properties(
                     name: "DEMO_GIT_BRANCH",
                     description: "The branch that contains the of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "labs"
+                    defaultValue: "test-quickstart"
                 ],
                 [
                     name: "DEMO_ROOT",
