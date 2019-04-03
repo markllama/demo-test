@@ -56,10 +56,16 @@ properties(
                     defaultValue: 'markllama'
                 ],
                 [
-                    name: 'MINIKUBE_VERSION',
-                    description: 'What version of minikube to use (no v prefix!)',
+                    name: 'MINISHIFT_VERSION',
+                    description: 'What version of minishift to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '1.0.0'
+                    defaultValue: '1.33.0'
+                ],
+                [
+                    name: "OPENSHIFT_VERSION",
+                    description: "Version of openshift to install (or 'none')",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "3.11.0"
                 ],
                 [
                     name: 'VIRT_DRIVER',
@@ -70,19 +76,13 @@ properties(
                         "kvm",
                         "virtualbox"
                     ].join("\n"),
-                    defaultValue: 'kvm2'
+                    defaultValue: 'kvm'
                 ],                
                 [
-                    name: 'START_MINIKUBE',
-                    description: 'start minikube after installing',
+                    name: 'START_MINISHIFT',
+                    description: 'start minishiftafter installing',
                     $class: 'hudson.model.BooleanParameterDefinition',
                     defaultValue: true
-                ],
-                [
-                    name: 'VIRT_DRIVER_VERSION',
-                    description: 'What version of kvm driver to use (no v prefix!): defaults to MINIKUBE_VERSION',
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "default"
                 ],
                 [
                     name: "KUBEVIRT_VERSION",
@@ -118,13 +118,13 @@ properties(
                     name: "NOTIFY_EMAIL_PASS",
                     description: "A comma separated list of email addressed to notify on success",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: ''
+                    defaultValue: ''  
                 ],
                 [
                     name: "NOTIFY_EMAIL_FAIL",
                     description: "A comma separated list of email addressed to notify on failure",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: ''
+                    defaultValue: ''  
                 ],
                 [
                     name: 'PERSIST',
@@ -143,15 +143,9 @@ properties(
     ]
 )
 
-start_minikube_enabled = START_MINIKUBE.toBoolean()
+start_shift_enabled = START_MINISHIFT.toBoolean()
 persist = PERSIST.toBoolean()
 debug = DEBUG.toBoolean()
-if (VIRT_DRIVER_VERSION == "default") {
-    VIRT_DRIVER_VERSION = MINIKUBE_VERSION
-} else {
-    echo "NOTICE: overriding default KVM driver version: ${VIRT_DRIVER_VERSION}"
-}
-
 //
 // Minishift Pods
 //   NOTE: Groovy map literal order is preserved
@@ -471,7 +465,7 @@ if (currentBuild.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
     // Duration
     // Stdout
     startTime = new Date(currentBuild.startTimeInMillis)
-
+    
     body = """
 Name           : minikube-demo-test ${currentBuild.number}
 Demo Name      : ${DEMO_NAME}
@@ -499,7 +493,7 @@ Total URL      : ${currentBuild.absoluteUrl}
         // Duration
         // Stdout
         startTime = new Date(currentBuild.startTimeInMillis)
-
+        
         body = """
 Name           : minikube-demo-test ${currentBuild.number}
 Demo Name      : ${DEMO_NAME}
@@ -517,6 +511,7 @@ Total URL      : ${currentBuild.absoluteUrl}
             body: body
         )
     }
+    
 } else {
     echo "No recipients for PASS email provided"
 }
