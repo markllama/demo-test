@@ -1,7 +1,5 @@
 // setup up and run the simple demo on four environments
 //
-// centos/minikube/KVM2
-// centos/minikube/VirtualBox
 // centos/minishift/KVM
 // centos/minishift/VirtualBox
 
@@ -14,8 +12,6 @@
 
 // Stage 4: Execute Demos
 
-// for JSON parsing
-import groovy.json.JsonSlurperClassic
 
 properties(
     [
@@ -47,7 +43,7 @@ properties(
                     defaultValue: 'markllama'
                 ],
                 [
-                   name: 'SSH_KEY_ID',
+                    name: 'SSH_KEY_ID',
                     description: 'SSH credential id to use',
                     $class: 'hudson.model.ChoiceParameterDefinition',
                     choices: [
@@ -56,33 +52,26 @@ properties(
                     defaultValue: 'markllama'
                 ],
                 [
-                    name: 'MINISHIFT_VERSION',
-                    description: 'What version of minishift to use (no v prefix!)',
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '1.33.0'
-                ],
-                [
-                    name: "OPENSHIFT_VERSION",
-                    description: "Version of openshift to install (or 'none')",
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "3.11.0"
-                ],
-                [
                     name: 'VIRT_DRIVER',
                     description: 'Which virtualization driver to use',
                     $class: 'hudson.model.ChoiceParameterDefinition',
                     choices: [
-                        "kvm2",
                         "kvm",
                         "virtualbox"
                     ].join("\n"),
                     defaultValue: 'kvm'
                 ],                
                 [
-                    name: 'START_MINISHIFT',
-                    description: 'start minishiftafter installing',
-                    $class: 'hudson.model.BooleanParameterDefinition',
-                    defaultValue: true
+                    name: 'MINISHIFT_VERSION',
+                    description: 'What version of minishift to use (no v prefix!)',
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: '1.33.0'
+                ],
+                [
+                    name: 'MINISHIFT_GITHUB_API_TOKEN',
+                    description: 'A Github API access token',
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: ''
                 ],
                 [
                     name: "KUBEVIRT_VERSION",
@@ -91,44 +80,14 @@ properties(
                     defaultValue: "none"
                 ],
                 [
-                    name: 'DEMO_NAME',
-                    description: "The username for SSH to the instance",
+                    name: 'OPENSHIFT_VERSION',
+                    description: 'What version of open to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: 'lab1'
-                ],
-                [
-                    name: "DEMO_GIT_REPO",
-                    description: "Where to find the demo page and test code",
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "https://github.com/markllama/kubevirt.github.io.git"
-                ],
-                [
-                    name: "DEMO_GIT_BRANCH",
-                    description: "The branch that contains the of the demo to run",
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "labs"
-                ],
-                [
-                    name: "DEMO_ROOT",
-                    description: "The directory that contains the demo tests",
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '_includes/scriptlets'
-                ],
-                [
-                    name: "NOTIFY_EMAIL_PASS",
-                    description: "A comma separated list of email addressed to notify on success",
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: ''  
-                ],
-                [
-                    name: "NOTIFY_EMAIL_FAIL",
-                    description: "A comma separated list of email addressed to notify on failure",
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: ''  
-                ],
+                    defaultValue: '3.11.0'
+                ],                
                 [
                     name: 'PERSIST',
-                    description: 'leave the minikube service in place',
+                    description: 'leave the minishift service in place',
                     $class: 'hudson.model.BooleanParameterDefinition',
                     defaultValue: false
                 ],
@@ -139,33 +98,23 @@ properties(
                     defaultValue: false
                 ]
             ]
-        ]
+        ],
+        disableConcurrentBuilds()
     ]
 )
 
-start_shift_enabled = START_MINISHIFT.toBoolean()
 persist = PERSIST.toBoolean()
 debug = DEBUG.toBoolean()
-//
-// Minishift Pods
-//   NOTE: Groovy map literal order is preserved
-system_pod_count = [
-    "coredns-": 2,
-    "kube-proxy-": 1,
-    "storage-provisioner": 1,
-    "kube-apiserver-minikube": 1,
-    "etcd-minikube": 1,
-    "kube-scheduler-minikube": 1,
-    "kube-addon-manager-minikube": 1,
-    "kube-controller-manager-minikube": 1,
-]
+
+def verify_github_api_access() {
+    echo "verifying Github API access"
+}
 
 def get_running_vms() {
     // get the list of running machines
+        // get the list of running machines
     switch (VIRT_DRIVER) {
         case 'kvm':
-        case 'kvm2':
-                
             machines = sh(
                 returnStdout: true,
                 script: "virsh --connect qemu:///system --readonly --quiet list --name"
@@ -178,7 +127,9 @@ def get_running_vms() {
                 script: "vboxmanage list vms"
             ).readLines().collect { it.split().head() }
             break;
-    }
+    }    
+
+    echo "Machines = ${machines}"
     return machines
 }
 
@@ -191,85 +142,91 @@ def get_kubectl() {
     sh "chmod a+x ${WORKSPACE}/bin/kubectl"
 }
 
+def get_openshift_client_tools() {
+    TARBALL_FILENAME=sh(
+        returnStdout: true,
+        script: "curl --silent --location https://github.com/openshift/origin/releases/download/v3.11.0/CHECKSUM | grep -E 'openshift-origin-client-tools-.*-linux-64bit.tar.gz' | awk '{print \$2}'"
+    ).trim()
+
+    sh("curl --silent --location --remote-name https://github.com/openshift/origin/releases/download/v3.11.0/${TARBALL_FILENAME}")
+    sh("tar -xzf ${TARBALL_FILENAME}")
+    TARBALL_DIRNAME=TARBALL_FILENAME.minus(".tar.gz")
+    sh("cp ${TARBALL_DIRNAME}/{kubectl,oc} ${WORKSPACE}/bin")
+    sh("chmod a+x ${WORKSPACE}/bin/{kubectl,oc}")
+    
+}
+
 def get_kvm_driver() {
     sh("curl --silent --location https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-centos7 -o ${WORKSPACE}/bin/docker-machine-driver-kvm")
     sh("chmod +x ${WORKSPACE}/bin/docker-machine-driver-kvm")
 }
 
-def get_kvm2_driver() {
-    echo "get_kvm2_driver"
-    sh ("curl --silent --location https://github.com/kubernetes/minikube/releases/download/v${VIRT_DRIVER_VERSION}/docker-machine-driver-kvm2 -o ${WORKSPACE}/bin/docker-machine-driver-kvm2")
-    sh ("chmod a+x ${WORKSPACE}/bin/docker-machine-driver-kvm2")
+def get_minishift() {
+    echo "get_minishift"
+    sh("curl --silent --location --remote-name https://github.com/minishift/minishift/releases/download/v${MINISHIFT_VERSION}/minishift-${MINISHIFT_VERSION}-linux-amd64.tgz")
+    sh("tar -xzf minishift-${MINISHIFT_VERSION}-linux-amd64.tgz minishift-${MINISHIFT_VERSION}-linux-amd64/minishift")
+    sh("mv minishift-${MINISHIFT_VERSION}-linux-amd64/minishift ${WORKSPACE}/bin")
+    sh ("chmod a+x ${WORKSPACE}/bin/minishift")
 }
 
-def get_minikube() {
-    echo "get_minikube"
-    sh("curl --silent --location https://github.com/kubernetes/minikube/releases/download/v${MINIKUBE_VERSION}/minikube-linux-amd64 -o ${WORKSPACE}/bin/minikube")
-    sh("chmod a+x ${WORKSPACE}/bin/minikube")
-}
+def start_minishift() {
+    echo "start_minishift"
+    start_log = sh(
+        returnStdout: true,
+        script: "${WORKSPACE}/bin/minishift start --vm-driver ${VIRT_DRIVER}"
+    )
 
-def start_minikube() {
-    echo "start_minikube"
-
-    MINIKUBE_VERBOSE = debug ? "-v 10" : "-v 1"
-    try {
-        start_log=sh(
-            returnStdout: true,
-            script: "${WORKSPACE}/bin/minikube start --vm-driver ${VIRT_DRIVER} ${MINIKUBE_VERBOSE}"
-        ).trim()
-
-        // There is a newer version of minikube available (v0.32.0)
-        if (start_log =~ /There is a newer version of minikube available/) {
-            // check stdout for "new version warning"
-            echo "There is a new version of minikube available"
-        }
-
-        if (start_log =~ /Everything looks great. Please enjoy minikube!/) {
-            // check stdout for "Everything looks great. Please enjoy minikube!"
-            echo "Yes! it worked!"
-        }
-
-        echo "--- reporting startup log ---"
+    if (start_log =~ /OpenShift server started./) {
+        // check for "OpenShift server started." in stdout
+        echo "Yes! it worked!"
+    } else {
+        echo "--- ERROR reporting startup log ---"
         echo start_log
         echo "-----------------------------"
-    } catch (err) {
-        echo "--- ERROR reporting startup log ---"
-        // if (exist start_log) {
-        //    echo start_log
-        // }
-        echo "-----------------------------"
-        error "error starting minikube"
+        error "error starting minishift"
     }
+
+    echo "--- reporting startup log ---"
+    echo start_log
+    echo "-----------------------------"
+}
+
+def login_as_admin() {
+    sh "oc login -u system:admin"
 }
 
 //
-// The kubevirt get pods JSON is an a
-//
-def wait_for_pods(int pod_count = 9, String namespace = "kube-system") {
+// Minishift Pods
+//   NOTE: Groovy map literal order is preserved
+system_pod_count = [
+    "openshift-apiserver-": 1,
+    "kube-dns-": 1,
+    "kube-proxy-": 1,
+    "openshift-service-cert-signer-operator-": 1,
+    "service-serving-cert-signer-": 1,
+    "apiservice-cabundle-injector-": 1,
+    "kube-controller-manager-localhost": 1,
+    "master-etcd-localhost": 1,
+    "kube-scheduler-localhost": 1,
+    "master-api-localhost": 1,
+    "openshift-controller-manager-": 1,
+    "persistent-volume-setup-": 1,
+    "openshift-web-console-operator-": 1,
+    "router-1-": 1,
+    "docker-registry-1-": 1,
+    "webconsole-": 1
+]
 
-    all_running = false
-    tries = 0
-    while (!all_running && tries < 30) {
-        def poddataJson = sh(
-            returnStdout: true,
-            script: "${WORKSPACE}/bin/kubectl get pods --namespace ${namespace} -o json | jq '[ .items[] | { \"name\": .metadata.name, \"phase\": .status.phase }]'"
-        )
+def wait_for_system_pods() {
 
-        def poddata = readJSON text: poddataJson
+    pod_data = sh(
+        returnStdout: true,
+        script: "${WORKSPACE}/bin/kubectl get pods --all-namespaces -o json"
+    )
 
-        if (poddata.size() == pod_count && poddata.every { p -> p.phase == "Running"}) {
-            all_running = true
-        }
-        
-        tries += 1
-        sleep(5)
-    }
+    pod_object = readJSON text: pod_data
 
-    if (all_running) {
-        echo "Confirmed ${pod_count} pods in namespace ${namespace}"
-    } else {
-        error("Failed to start ${pod_count} pods in namespace ${namespace}")
-    } 
+    echo "There are ${pod_object.size()} pods"
 }
 
 def enable_weave_cni() {
@@ -281,89 +238,70 @@ def enable_weave_cni() {
 
 }
 
-def clean_minikube() {
-    echo "cleaning minikube"
-    sh "${WORKSPACE}/bin/minikube delete"
-
-    // check if the VM is still present
-    if (get_running_vms().contains('minikube')) {
-        echo "minikube vm still exists"
-        try {
-            // stop the VM
-            sh "virsh --connect qemu:///system destroy minikube"
-
-            // delete the VM
-            sh "virsh --connect qemu:///system undefine --remove-all-storage minikube"
-        } catch (err) {
-            echo "error removing VMs: ${err}"
-        }
-    }
-}
-
-def check_virt_kvm() {
-    echo "check_virt_kvm"
-    sh("sudo systemctl status libvirtd")
-}
-
 def install_kubevirt() {
 
     sh "curl --silent -L -o ${WORKSPACE}/bin/virtctl https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/virtctl-v${KUBEVIRT_VERSION}-linux-amd64"
     sh "chmod a+x ${WORKSPACE}/bin/virtctl"
-    // just for demos that want it in CWD
-    sh "ln -s bin/virtctl ."
 
     // install the kubevirt operator
-    sh "kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/kubevirt-operator.yaml"
-
-    // wait for operator running
+    sh "oc create -f https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/kubevirt-operator.yaml"
     
     // enable virt emulation
-    sh "kubectl create configmap -n kubevirt kubevirt-config --from-literal debug.useEmulation=true"
+    sh "oc create configmap -n kubevirt kubevirt-config --from-literal debug.useEmulation=true"
 
     // install the kubevirt custom resource
-    sh "kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/kubevirt-cr.yaml"
+    sh "oc create -f https://github.com/kubevirt/kubevirt/releases/download/v${KUBEVIRT_VERSION}/kubevirt-cr.yaml"
 
     // wait for pods to initialize
+}
 
+def clean_minishift() {
+    echo "cleaning minishift"
+    sh "${WORKSPACE}/bin/minishift delete -f"
+}
+
+def check_libvirt_kvm() {
+    echo "check_libvirt_kvm"
+    sh("sudo systemctl status libvirtd")
 }
 
 node(TARGET_NODE) {
 
-    currentBuild.displayName = "${currentBuild.number} - minikube-${MINIKUBE_VERSION} / ${VIRT_DRIVER} / ${DEMO_NAME}"
+    currentBuild.displayName = "${currentBuild.number} - minishift-${MINISHIFT_VERSION} / ${VIRT_DRIVER}"
     //sh("echo I ran")
     //echo "I ran"
 
-    checkout scm
+    // This might not be needed here
+    // checkout scm
 
     //stage("verify virtualization") {
     //    check_virt_kvm()
     //}
-    if (get_running_vms().contains('minikube')) {
-        error("minikube VM already exists")
+
+    if (get_running_vms().contains('minishift')) {
+        error("minishift VM already exists")
     }
 
     withEnv(
         [
             "PATH=${WORKSPACE}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
             "HOME=${WORKSPACE}",
-            "KUBECONFIG=${WORKSPACE}/kubeconfig",
-            "MINIKUBE_HOME=${WORKSPACE}"
+            "MINISHIFT_HOME=${WORKSPACE}",
+            "MINISHIFT_GITHUB_API_TOKEN=${MINISHIFT_GITHUB_API_TOKEN}"
         ]
     ) {
         try {
             stage("prepare for mini env") {
                 sh "mkdir -p bin"
-                get_kubectl()
-                
+                get_openshift_client_tools()
+            }
+
+            stage("install virt driver") {
                 switch(VIRT_DRIVER) {
                     case 'kvm':
                         get_kvm_driver()
                         break;
                     
-                    case 'kvm2':
-                        get_kvm2_driver()
-                        break;
-
                     case 'virtualbox':
                         echo "no external driver for virtualbox"
                         break
@@ -372,25 +310,37 @@ node(TARGET_NODE) {
                         echo "ERROR - invalid virtualzation driver: ${VIRT_DRIVER}"
                         break;       
                 }
+            }
 
-                get_minikube()
-                if (start_minikube_enabled) {
-                    start_minikube()
-                    wait_for_pods(9, 'kube-system')
-                }
-                // enable_weave_cni()
+            stage("install minishift") {
+                get_minishift()
+            }
+
+            stage("start minishift") {
+                start_minishift()
+            }
+
+            stage("login admin user") {
+                login_as_admin()
             }
             
+            stage("wait_for_system_pods") {
+                wait_for_system_pods()
+            }
+
+            stage("enable weave CNI") {
+                enable_weave_cni()
+            }
+
             stage("install kubevirt") {
-                if (KUBEVIRT_VERSION != 'none' && start_minikube_enabled) {
+                if (KUBEVIRT_VERSION != 'none') {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
-                    wait_for_pods(6, "kubevirt")
                 } else {
                     echo "kubevirt installation disabled"
                 }
             }
-
+            
             stage('clone demo repo') {
                 echo "cloning demo repo"
                 checkout(
@@ -436,82 +386,15 @@ node(TARGET_NODE) {
             }
             
         } finally {
-            stage("teardown minikube") {
-
-                archiveArtifacts artifacts: "demo-test-result-*.txt"
-
-                if (!persist) {
-                    echo "Cleaning up minikube on agent"
-                    try {
-                        clean_minikube()
-                    } catch (err) {
-                        echo "error cleaning minikube"
-                    }
-                    cleanWs()
-                    deleteDir()
-                } else {
-                    echo "PERSIST = true - cleanup disabled"
+            if (!persist) {
+                try {
+                    clean_minishift()
+                } catch (err) {
+                    echo "error cleaning minishift"
                 }
+                cleanWs()
+                deleteDir()
             }
         }
     }
-}
-
-if (currentBuild.currentResult == 'SUCCESS' && NOTIFY_EMAIL_PASS != '') {
-    echo "Sending success email to ${NOTIFY_EMAIL_PASS}"
-    // Compose the body of a PASS email
-    // Start time
-    // End time
-    // Duration
-    // Stdout
-    startTime = new Date(currentBuild.startTimeInMillis)
-    
-    body = """
-Name           : minikube-demo-test ${currentBuild.number}
-Demo Name      : ${DEMO_NAME}
-Start Time     : ${startTime.toString()}
-Total Duration : ${currentBuild.durationString}
-Total Status   : ${currentBuild.currentResult}
-Total URL      : ${currentBuild.absoluteUrl}
-
-"""
-
-    mail(
-        to: NOTIFY_EMAIL_PASS,
-        from: "kubevirt-demo-test@redhat.com",
-        replyTo: "mlamouri+jenkins@redhat.com",
-        subject: "[minikube-demo-test] PASS",
-        body: body
-    )
-} else if (currentBuild.currentResult == 'FAILURE' && NOTIFY_EMAIL_FAIL != '') {
-    // report demo failure
-    if (NOTIFY_EMAIL_FAIL != '') {
-        echo "Sending failure email to ${NOTIFY_EMAIL_FAIL}"
-        // Compose the body of a FAIL email
-        // Start time
-        // End time
-        // Duration
-        // Stdout
-        startTime = new Date(currentBuild.startTimeInMillis)
-        
-        body = """
-Name           : minikube-demo-test ${currentBuild.number}
-Demo Name      : ${DEMO_NAME}
-Start Time     : ${startTime.toString()}
-Total Duration : ${currentBuild.durationString}
-Total Status   : ${currentBuild.currentResult}
-Total URL      : ${currentBuild.absoluteUrl}
-"""
-
-        mail(
-            to: NOTIFY_EMAIL_FAIL,
-            from: "kubevirt-demo-test@redhat.com",
-            replyTo: "mlamouri+jenkins@redhat.com",
-            subject: "[minikube-demo-test] FAIL",
-            body: body
-        )
-    }
-    
-} else {
-    echo "No recipients for PASS email provided"
 }
