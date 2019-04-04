@@ -211,6 +211,16 @@ def get_minishift() {
     sh("tar -xzf minishift-${MINISHIFT_VERSION}-linux-amd64.tgz minishift-${MINISHIFT_VERSION}-linux-amd64/minishift")
     sh("mv minishift-${MINISHIFT_VERSION}-linux-amd64/minishift ${WORKSPACE}/bin")
     sh ("chmod a+x ${WORKSPACE}/bin/minishift")
+
+    // find the oc binary in the .minishift directory
+
+    oc_path = sh(
+        returnStdout: true,
+        script: "find ${MINISHIFT_HOME} -type f -name oc"
+    ).trim()
+    echo "Copying ${oc_path} to ${MINISHIFT_HOME}/bin"
+    File.copy("${MINISHIFT_HOME}/${oc_path}", "${WORKSPACE}/bin")
+    sh ("chmod a+x ${WORKSPACE}/bin/oc")
 }
 
 def start_minishift() {
