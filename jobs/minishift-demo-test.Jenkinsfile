@@ -177,7 +177,7 @@ def get_running_vms() {
     return machines
 }
 
-def get_kubectl() {
+def install_kubectl() {
     KUBE_VERSION=sh(
         returnStdout: true,
         script:"curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt"
@@ -369,6 +369,10 @@ node(TARGET_NODE) {
                         break;       
                 }
 
+            }
+
+            stage("install kubectl") {
+                install_kubectl()
             }
 
             stage("start minishift") {
