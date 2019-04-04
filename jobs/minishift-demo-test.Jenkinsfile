@@ -52,6 +52,19 @@ properties(
                     defaultValue: 'markllama'
                 ],
                 [
+                    name: 'MINISHIFT_VERSION',
+                    description: 'What version of minishift to use (no v prefix!)',
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: '1.33.0'
+                ],
+
+                [
+                    name: 'MINISHIFT_GITHUB_API_TOKEN',
+                    description: 'A Github API access token',
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: ''
+                ],
+                [
                     name: 'VIRT_DRIVER',
                     description: 'Which virtualization driver to use',
                     $class: 'hudson.model.ChoiceParameterDefinition',
@@ -62,16 +75,16 @@ properties(
                     defaultValue: 'kvm'
                 ],                
                 [
-                    name: 'MINISHIFT_VERSION',
-                    description: 'What version of minishift to use (no v prefix!)',
+                    name: 'OPENSHIFT_VERSION',
+                    description: 'What version of open to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '1.33.0'
+                    defaultValue: '3.11.0'
                 ],
                 [
-                    name: 'MINISHIFT_GITHUB_API_TOKEN',
-                    description: 'A Github API access token',
-                    $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: ''
+                    name: 'START_MINISHIFT',
+                    description: 'start minishift after installing',
+                    $class: 'hudson.model.BooleanParameterDefinition',
+                    defaultValue: true
                 ],
                 [
                     name: "KUBEVIRT_VERSION",
@@ -80,11 +93,41 @@ properties(
                     defaultValue: "none"
                 ],
                 [
-                    name: 'OPENSHIFT_VERSION',
-                    description: 'What version of open to use (no v prefix!)',
+                    name: 'DEMO_NAME',
+                    description: "The username for SSH to the instance",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '3.11.0'
-                ],                
+                    defaultValue: 'lab1'
+                ],
+                [
+                    name: "DEMO_GIT_REPO",
+                    description: "Where to find the demo page and test code",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "https://github.com/markllama/kubevirt.github.io.git"
+                ],
+                [
+                    name: "DEMO_GIT_BRANCH",
+                    description: "The branch that contains the of the demo to run",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: "labs"
+                ],
+                [
+                    name: "DEMO_ROOT",
+                    description: "The directory that contains the demo tests",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: '_includes/scriptlets'
+                ],
+                [
+                    name: "NOTIFY_EMAIL_PASS",
+                    description: "A comma separated list of email addressed to notify on success",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: ''
+                ],
+                [
+                    name: "NOTIFY_EMAIL_FAIL",
+                    description: "A comma separated list of email addressed to notify on failure",
+                    $class: 'hudson.model.StringParameterDefinition',
+                    defaultValue: ''
+                ],
                 [
                     name: 'PERSIST',
                     description: 'leave the minishift service in place',
@@ -103,6 +146,7 @@ properties(
     ]
 )
 
+start_minishift_enabled = START_MINISHIFT.toBoolean()
 persist = PERSIST.toBoolean()
 debug = DEBUG.toBoolean()
 
@@ -142,19 +186,19 @@ def get_kubectl() {
     sh "chmod a+x ${WORKSPACE}/bin/kubectl"
 }
 
-def get_openshift_client_tools() {
-    TARBALL_FILENAME=sh(
-        returnStdout: true,
-        script: "curl --silent --location https://github.com/openshift/origin/releases/download/v3.11.0/CHECKSUM | grep -E 'openshift-origin-client-tools-.*-linux-64bit.tar.gz' | awk '{print \$2}'"
-    ).trim()
+// def get_openshift_client_tools() {
+//     TARBALL_FILENAME=sh(
+//         returnStdout: true,
+//         script: "curl --silent --location https://github.com/openshift/origin/releases/download/v3.11.0/CHECKSUM | grep -E 'openshift-origin-client-tools-.*-linux-64bit.tar.gz' | awk '{print \$2}'"
+//     ).trim()
 
-    sh("curl --silent --location --remote-name https://github.com/openshift/origin/releases/download/v3.11.0/${TARBALL_FILENAME}")
-    sh("tar -xzf ${TARBALL_FILENAME}")
-    TARBALL_DIRNAME=TARBALL_FILENAME.minus(".tar.gz")
-    sh("cp ${TARBALL_DIRNAME}/{kubectl,oc} ${WORKSPACE}/bin")
-    sh("chmod a+x ${WORKSPACE}/bin/{kubectl,oc}")
+//     sh("curl --silent --location --remote-name https://github.com/openshift/origin/releases/download/v3.11.0/${TARBALL_FILENAME}")
+//     sh("tar -xzf ${TARBALL_FILENAME}")
+//     TARBALL_DIRNAME=TARBALL_FILENAME.minus(".tar.gz")
+//     sh("cp ${TARBALL_DIRNAME}/{kubectl,oc} ${WORKSPACE}/bin")
+//     sh("chmod a+x ${WORKSPACE}/bin/{kubectl,oc}")
     
-}
+// }
 
 def get_kvm_driver() {
     sh("curl --silent --location https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-centos7 -o ${WORKSPACE}/bin/docker-machine-driver-kvm")
@@ -291,12 +335,14 @@ node(TARGET_NODE) {
         ]
     ) {
         try {
-            stage("prepare for mini env") {
-                sh "mkdir -p bin"
-                get_openshift_client_tools()
-            }
 
-            stage("install virt driver") {
+            stage("install minishift") {
+
+                // where to put binaries and add path
+                sh "mkdir -p bin"
+                
+                get_minishift()
+
                 switch(VIRT_DRIVER) {
                     case 'kvm':
                         get_kvm_driver()
@@ -310,34 +356,27 @@ node(TARGET_NODE) {
                         echo "ERROR - invalid virtualzation driver: ${VIRT_DRIVER}"
                         break;       
                 }
-            }
 
-            stage("install minishift") {
-                get_minishift()
             }
 
             stage("start minishift") {
-                start_minishift()
-            }
-
-            stage("login admin user") {
-                login_as_admin()
-            }
-            
-            stage("wait_for_system_pods") {
-                wait_for_system_pods()
-            }
-
-            stage("enable weave CNI") {
-                enable_weave_cni()
+                if (start_minishift_enabled) {
+                    echo "Starting minishift"
+                    start_minishift()
+                    login_as_admin()
+                    wait_for_system_pods()
+                    enable_weave_cni()
+                } else {
+                    echo "Minishift startup disabled"
+                }
             }
 
             stage("install kubevirt") {
-                if (KUBEVIRT_VERSION != 'none') {
+                if (start_minishift_enabled && KUBEVIRT_VERSION != 'none') {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
                 } else {
-                    echo "kubevirt installation disabled"
+                    echo "Kubevirt installation disabled"
                 }
             }
             
