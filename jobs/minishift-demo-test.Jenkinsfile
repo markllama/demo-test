@@ -323,6 +323,8 @@ def check_libvirt_kvm() {
 
 node(TARGET_NODE) {
 
+    checkout scm
+    
     currentBuild.displayName = "${currentBuild.number} - minishift-${MINISHIFT_VERSION} / ${VIRT_DRIVER}"
     //sh("echo I ran")
     //echo "I ran"
