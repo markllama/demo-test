@@ -177,14 +177,14 @@ def get_running_vms() {
     return machines
 }
 
-def install_kubectl() {
-    KUBE_VERSION=sh(
-        returnStdout: true,
-        script:"curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt"
-    ).trim()
-    sh "curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl -o ${WORKSPACE}/bin/kubectl"
-    sh "chmod a+x ${WORKSPACE}/bin/kubectl"
-}
+// def install_kubectl() {
+//     KUBE_VERSION=sh(
+//         returnStdout: true,
+//         script:"curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+//     ).trim()
+//     sh "curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl -o ${WORKSPACE}/bin/kubectl"
+//     sh "chmod a+x ${WORKSPACE}/bin/kubectl"
+// }
 
 // def get_openshift_client_tools() {
 //     TARBALL_FILENAME=sh(
@@ -374,9 +374,9 @@ node(TARGET_NODE) {
 
             }
 
-            stage("install kubectl") {
-                install_kubectl()
-            }
+            // stage("install kubectl") {
+            //     install_kubectl()
+            // }
 
             stage("start minishift") {
                 if (start_minishift_enabled) {
