@@ -212,15 +212,6 @@ def get_minishift() {
     sh("mv minishift-${MINISHIFT_VERSION}-linux-amd64/minishift ${WORKSPACE}/bin")
     sh ("chmod a+x ${WORKSPACE}/bin/minishift")
 
-    // find the oc binary in the .minishift directory
-
-    oc_path = sh(
-        returnStdout: true,
-        script: "find ${MINISHIFT_HOME} -type f -name oc"
-    ).trim()
-    echo "Copying ${oc_path} to ${MINISHIFT_HOME}/bin"
-    sh"cp ${MINISHIFT_HOME}/${oc_path} ${WORKSPACE}/bin"
-    sh ("chmod a+x ${WORKSPACE}/bin/oc")
 }
 
 def start_minishift() {
@@ -243,6 +234,17 @@ def start_minishift() {
     echo "--- reporting startup log ---"
     echo start_log
     echo "-----------------------------"
+}
+
+def copy_cli_client() {
+    // find the oc binary in the .minishift directory
+    oc_path = sh(
+        returnStdout: true,
+        script: "find ${MINISHIFT_HOME} -type f -name oc"
+    ).trim()
+    echo "Copying ${oc_path} to ${MINISHIFT_HOME}/bin"
+    sh("cp ${MINISHIFT_HOME}/${oc_path} ${WORKSPACE}/bin")
+    sh("chmod a+x ${WORKSPACE}/bin/oc")
 }
 
 def login_as_admin() {
@@ -373,6 +375,7 @@ node(TARGET_NODE) {
                 if (start_minishift_enabled) {
                     echo "Starting minishift"
                     start_minishift()
+                    copy_cli_client()
                     login_as_admin()
                     wait_for_system_pods()
                     enable_weave_cni()
