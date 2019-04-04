@@ -243,7 +243,7 @@ def copy_cli_client() {
         script: "find ${MINISHIFT_HOME} -type f -name oc"
     ).trim()
     echo "Copying ${oc_path} to ${MINISHIFT_HOME}/bin"
-    sh("cp ${MINISHIFT_HOME}/${oc_path} ${WORKSPACE}/bin")
+    sh("cp ${oc_path} ${WORKSPACE}/bin")
     sh("chmod a+x ${WORKSPACE}/bin/oc")
 }
 
