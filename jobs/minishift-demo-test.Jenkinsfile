@@ -219,7 +219,7 @@ def get_minishift() {
         script: "find ${MINISHIFT_HOME} -type f -name oc"
     ).trim()
     echo "Copying ${oc_path} to ${MINISHIFT_HOME}/bin"
-    Files.copy("${MINISHIFT_HOME}/${oc_path}", "${WORKSPACE}/bin")
+    sh"cp ${MINISHIFT_HOME}/${oc_path} ${WORKSPACE}/bin"
     sh ("chmod a+x ${WORKSPACE}/bin/oc")
 }
 
