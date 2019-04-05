@@ -274,16 +274,31 @@ system_pod_count = [
     "webconsole-": 1
 ]
 
-def wait_for_system_pods() {
+def wait_for_pods(int pod_count = 9, String namespace = "kube-system") {
 
-    pod_data = sh(
-        returnStdout: true,
-        script: "${WORKSPACE}/bin/kubectl get pods --all-namespaces -o json"
-    )
+    all_running = false
+    tries = 0
+    while (!all_running && tries < 30) {
+        def poddataJson = sh(
+            returnStdout: true,
+            script: "${WORKSPACE}/bin/kubectl get pods --namespace ${namespace} -o json | jq '[ .items[] | { \"name\": .metadata.name, \"phase\": .status.phase }]'"
+        )
 
-    pod_object = readJSON text: pod_data
+        def poddata = readJSON text: poddataJson
 
-    echo "There are ${pod_object.size()} pods"
+        if (poddata.size() == pod_count && poddata.every { p -> p.phase == "Running"}) {
+            all_running = true
+        }
+        
+        tries += 1
+        sleep(5)
+    }
+
+    if (all_running) {
+        echo "Confirmed ${pod_count} pods in namespace ${namespace}"
+    } else {
+        error("Failed to start ${pod_count} pods in namespace ${namespace}")
+    } 
 }
 
 def enable_weave_cni() {
@@ -388,7 +403,7 @@ node(TARGET_NODE) {
                     start_minishift()
                     copy_cli_client()
                     login_as_admin()
-                    wait_for_system_pods(4, "kube-system")
+                    wait_for_pods(4, "kube-system")
                     enable_weave_cni()
                 } else {
                     echo "Minishift startup disabled"
