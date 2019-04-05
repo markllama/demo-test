@@ -346,6 +346,7 @@ node(TARGET_NODE) {
             "PATH=${WORKSPACE}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
             "HOME=${WORKSPACE}",
             "MINISHIFT_HOME=${WORKSPACE}",
+            "KUBECONFIG=${WORKSPACE}/.kube/config",
             "MINISHIFT_GITHUB_API_TOKEN=${MINISHIFT_GITHUB_API_TOKEN}"
         ]
     ) {
