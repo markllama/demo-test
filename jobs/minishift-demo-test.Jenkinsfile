@@ -414,8 +414,7 @@ node(TARGET_NODE) {
                 if (start_minishift_enabled && KUBEVIRT_VERSION != 'none') {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
-                    wait_for_pods(6, 'kubevirt')
-                    
+                    wait_for_pods(6, 'kubevirt')                    
                 } else {
                     echo "Kubevirt installation disabled"
                 }
@@ -449,10 +448,10 @@ node(TARGET_NODE) {
             stage("run demo") {
                 echo "running ${DEMO_NAME} from ${DEMO_GIT_REPO}:${DEMO_GIT_BRANCH}"
 
-                sh "which kubectl"
+                // labs require virtctl in CWD to run
+                sh ("ln -s ${WORKSPACE}/bin/virtctl ./virtctl")
 
                 def filename = "demo-test-result-${demo_name}.txt"
-
 
                 return_code = sh (
                     returnStatus: true,
