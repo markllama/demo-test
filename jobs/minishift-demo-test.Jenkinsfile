@@ -388,7 +388,7 @@ node(TARGET_NODE) {
                     start_minishift()
                     copy_cli_client()
                     login_as_admin()
-                    wait_for_system_pods()
+                    wait_for_system_pods(9, "kube-system")
                     enable_weave_cni()
                 } else {
                     echo "Minishift startup disabled"
@@ -399,6 +399,8 @@ node(TARGET_NODE) {
                 if (start_minishift_enabled && KUBEVIRT_VERSION != 'none') {
                     echo "installing kubevirt: ${KUBEVIRT_VERSION}"
                     install_kubevirt()
+                    wait_for_pods(6, 'kubevirt')
+                    
                 } else {
                     echo "Kubevirt installation disabled"
                 }
