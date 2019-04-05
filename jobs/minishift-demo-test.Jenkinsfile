@@ -354,6 +354,7 @@ node(TARGET_NODE) {
 
             sh "pwd"
             sh "env"
+            sh "which kubectl"
             
             stage("install minishift") {
 
