@@ -354,7 +354,6 @@ node(TARGET_NODE) {
 
             sh "pwd"
             sh "env"
-            sh "which kubectl"
             
             stage("install minishift") {
 
@@ -432,6 +431,8 @@ node(TARGET_NODE) {
             
             stage("run demo") {
                 echo "running ${DEMO_NAME} from ${DEMO_GIT_REPO}:${DEMO_GIT_BRANCH}"
+
+                sh "which kubectl"
 
                 def filename = "demo-test-result-${demo_name}.txt"
 
