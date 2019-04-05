@@ -244,8 +244,8 @@ def copy_cli_client() {
     ).trim()
     echo "Copying ${oc_path} to ${MINISHIFT_HOME}/bin"
     sh("cp ${oc_path} ${WORKSPACE}/bin")
-    sh("chmod a+x ${WORKSPACE}/bin/oc")
     sh("ln -s ${WORKSPACE}/bin/oc ${WORKSPACE}/bin/kubectl")
+    sh("chmod a+x ${WORKSPACE}/bin/*")
 }
 
 def login_as_admin() {
