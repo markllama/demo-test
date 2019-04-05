@@ -449,14 +449,22 @@ node(TARGET_NODE) {
             }
             
         } finally {
-            if (!persist) {
-                try {
-                    clean_minishift()
-                } catch (err) {
-                    echo "error cleaning minishift"
+            stage("teardown minishift") {
+
+                archiveArtifacts artifacts: "demo-test-result-*.txt"
+
+                if (!persist) {
+                    echo "Cleaning up minishift on agent"
+                    try {
+                        clean_minishift()
+                    } catch (err) {
+                        echo "error cleaning minishift"
+                    }
+                    cleanWs()
+                    deleteDir()
+                } else {
+                    echo "PERSIST = true - cleanup disabled"
                 }
-                cleanWs()
-                deleteDir()
             }
         }
     }
