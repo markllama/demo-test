@@ -352,6 +352,9 @@ node(TARGET_NODE) {
     ) {
         try {
 
+            sh "pwd"
+            sh "env"
+            
             stage("install minishift") {
 
                 // where to put binaries and add path
