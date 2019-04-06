@@ -21,7 +21,7 @@ properties(
                     name: 'MINIKUBE_VERSION',
                     description: 'What version of minikube to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '1.0.0'
+                    defaultValue: CURRENT_MINIKUBE_VERSION
                 ],
                 [
                     name: 'VIRT_DRIVER',
@@ -38,13 +38,13 @@ properties(
                     name: 'VIRT_DRIVER_VERSION',
                     description: 'What version of kvm driver to use (no v prefix!): defaults to MINIKUBE_VERSION',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "1.0.0"
+                    defaultValue: CURRENT_MINIKUBE_VERSION
                 ],
                 [
                     name: "KUBEVIRT_VERSION",
                     description: "Version of kubevirt to install (or 'none')",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "0.15.0"
+                    defaultValue: CURRENT_KUBEVIRT_VERSION
                 ],
                 [
                     name: 'DEMO_NAME',
