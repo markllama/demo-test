@@ -333,7 +333,7 @@ def wait_for_step(t):
 
         logging.debug("Step '{}': tries: {}. output:\n{}".format(t['name'], tries, output))
 
-        if success_pattern.match(output):
+        if success_pattern.search(output):
             logging.info("Step '{}': success after {} tries".format(t['name'], tries))
             success = True
             return True
