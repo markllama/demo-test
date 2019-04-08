@@ -21,7 +21,7 @@ properties(
                     name: 'MINIKUBE_VERSION',
                     description: 'What version of minikube to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '0.35.0'
+                    defaultValue: ''
                 ],
                 [
                     name: 'VIRT_DRIVER',
@@ -38,13 +38,13 @@ properties(
                     name: 'VIRT_DRIVER_VERSION',
                     description: 'What version of kvm driver to use (no v prefix!): defaults to MINIKUBE_VERSION',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "0.31.0"
+                    defaultValue: ""
                 ],
                 [
                     name: "KUBEVIRT_VERSION",
                     description: "Version of kubevirt to install (or 'none')",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "0.15.0"
+                    defaultValue: ""
                 ],
                 [
                     name: 'DEMO_NAME',
@@ -115,6 +115,22 @@ properties(
 //
 
 node(TARGET_NODE) {
+
+    // set from defaults if not set
+    if (MINIKUBE_VERSION == "") {
+        echo "Setting minikube version from default: ${env.CURRENT_MINIKUBE_VERSION}"
+        MINIKUBE_VERSION = "${env.CURRENT_MINIKUBE_VERSION}"
+    }
+    echo "MINIKUBE_VERSION = '${MINIKUBE_VERSION}'"
+
+
+    if (KUBEVIRT_VERSION == "") {
+        echo "Setting kubevirt version from default: ${env.CURRENT_KUBEVIRT_VERSION}"
+        KUBEVIRT_VERSION = "${env.CURRENT_KUBEVIRT_VERSION}"
+    }
+    echo "KUBEVIRT_VERSION = '${KUBEVIRT_VERSION}'"
+    
+
     stage("run lab1 on Minikube") {
         demo = build(
             job: "kubevirt/minikube-demo-test",
