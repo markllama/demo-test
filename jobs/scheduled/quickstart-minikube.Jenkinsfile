@@ -119,14 +119,14 @@ node(TARGET_NODE) {
     // set from defaults if not set
     if (MINIKUBE_VERSION == "") {
         echo "Setting minikube version from default: ${env.CURRENT_MINIKUBE_VERSION}"
-        MINIKUBE_VERSION = env.CURRENT_MINIKUBE_VERSION
+        MINIKUBE_VERSION = "${env.CURRENT_MINIKUBE_VERSION}"
     }
     echo "MINIKUBE_VERSION = '${MINIKUBE_VERSION}'"
 
 
     if (KUBEVIRT_VERSION == "") {
         echo "Setting kubevirt version from default: ${env.CURRENT_KUBEVIRT_VERSION}"
-        KUBEVIRT_VERSION = env.CURRENT_KUBEVIRT_VERSION
+        KUBEVIRT_VERSION = "${env.CURRENT_KUBEVIRT_VERSION}"
     }
     echo "KUBEVIRT_VERSION = '${KUBEVIRT_VERSION}'"
     

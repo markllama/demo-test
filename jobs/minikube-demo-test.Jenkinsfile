@@ -348,6 +348,8 @@ node(TARGET_NODE) {
         error("minikube VM already exists")
     }
 
+    echo "MINIKUBE_VERSION=${MINIKUBE_VERSION}\nKUBEVIRT_VERSION=${KUBEVIRT_VERSION}
+"
     withEnv(
         [
             "PATH=${WORKSPACE}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
