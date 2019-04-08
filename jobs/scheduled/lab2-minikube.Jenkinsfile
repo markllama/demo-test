@@ -50,7 +50,7 @@ properties(
                     name: 'DEMO_NAME',
                     description: "The name of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: ''
+                    defaultValue: 'lab2'
                 ],
                 [
                     name: "DEMO_GIT_REPO",
@@ -62,7 +62,7 @@ properties(
                     name: "DEMO_GIT_BRANCH",
                     description: "The branch that contains the of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "labs"
+                    defaultValue: "master"
                 ],
                 [
                     name: "DEMO_ROOT",
@@ -131,7 +131,7 @@ node(TARGET_NODE) {
     echo "KUBEVIRT_VERSION = '${KUBEVIRT_VERSION}'"
     
 
-    stage("run lab1 on Minikube") {
+    stage("run lab2 on Minikube") {
         demo = build(
             job: "kubevirt/minikube-demo-test",
             propagate: false,
@@ -202,7 +202,7 @@ node(TARGET_NODE) {
 
         archiveArtifacts artifacts: "demo-test-result-*.txt"
 
-        currentBuild.displayName = "lab1@minikube ${demo.displayName}"
+        currentBuild.displayName = "lab2@minikube ${demo.displayName}"
         currentBuild.result = demo.result
 
     }
