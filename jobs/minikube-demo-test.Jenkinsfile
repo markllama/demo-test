@@ -82,7 +82,7 @@ properties(
                     name: 'VIRT_DRIVER_VERSION',
                     description: 'What version of kvm driver to use (no v prefix!): defaults to MINIKUBE_VERSION',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "default"
+                    defaultValue: ""
                 ],
                 [
                     name: "KUBEVIRT_VERSION",
@@ -146,7 +146,7 @@ properties(
 start_minikube_enabled = START_MINIKUBE.toBoolean()
 persist = PERSIST.toBoolean()
 debug = DEBUG.toBoolean()
-if (VIRT_DRIVER_VERSION == "default") {
+if (VIRT_DRIVER_VERSION == "") {
     VIRT_DRIVER_VERSION = MINIKUBE_VERSION
 } else {
     echo "NOTICE: overriding default KVM driver version: ${VIRT_DRIVER_VERSION}"
