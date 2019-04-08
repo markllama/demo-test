@@ -45,13 +45,13 @@ properties(
                     name: "DEMO_GIT_REPO",
                     description: "Where to find the demo page and test code",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "https://github.com/markllama/kubevirt.github.io.git"
+                    defaultValue: "https://github.com/kubevirt/kubevirt.github.io.git"
                 ],
                 [
                     name: "DEMO_GIT_BRANCH",
                     description: "The branch that contains the of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "labs"
+                    defaultValue: "master"
                 ],
                 [
                     name: "DEMO_ROOT",
@@ -91,6 +91,7 @@ properties(
 //
 
 node(TARGET_NODE) {
+
     stage("run lab1 on AWS") {
         demo = build(
             job: "kubevirt/aws-demo-test",
