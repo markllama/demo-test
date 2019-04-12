@@ -21,13 +21,13 @@ properties(
                     name: 'MINISHIFT_VERSION',
                     description: 'What version of minishift to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '1.33.0'
+                    defaultValue: ''
                 ],
                 [
                     name: 'OPENSHIFT_VERSION',
                     description: 'What version of openshift to use (no v prefix!)',
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: '3.11.0'
+                    defaultValue: ''
                 ],
                 [
                     name: 'VIRT_DRIVER',
@@ -44,7 +44,7 @@ properties(
                     name: "KUBEVIRT_VERSION",
                     description: "Version of kubevirt to install (or 'none')",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "0.15.0"
+                    defaultValue: ""
                 ],
                 [
                     name: 'DEMO_NAME',
@@ -114,6 +114,25 @@ properties(
 //
 
 node(TARGET_NODE) {
+    // set from defaults if not set
+    if (MINISHIFT_VERSION == "") {
+        echo "Setting minishift version from default: ${env.CURRENT_MINISHIFT_VERSION}"
+        MINISHIFT_VERSION = "${env.CURRENT_MINISHIFT_VERSION}"
+    }
+    echo "MINISHIFT_VERSION = '${MINISHIFT_VERSION}'"
+
+    if (OPENSHIFT_VERSION == "") {
+        echo "Setting openshift version from default: ${env.CURRENT_OPENSHIFT_VERSION}"
+        OPENSHIFT_VERSION = "${env.CURRENT_OPENSHIFT_VERSION}"
+    }
+    echo "MINISHIFT_VERSION = '${OPENSHIFT_VERSION}'"
+
+    if (KUBEVIRT_VERSION == "") {
+        echo "Setting kubevirt version from default: ${env.CURRENT_KUBEVIRT_VERSION}"
+        KUBEVIRT_VERSION = "${env.CURRENT_KUBEVIRT_VERSION}"
+    }
+    echo "KUBEVIRT_VERSION = '${KUBEVIRT_VERSION}'"
+
     stage("run lab1 on Minikube") {
         demo = build(
             job: "kubevirt/minikube-demo-test",
