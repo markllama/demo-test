@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Endpoints
+metadata:
+  creationTimestamp: 2019-04-11T13:45:33Z
+  labels:
+    app: jenkins-ephemeral
+    template: jenkins-ephemeral-template
+  name: cd
+  namespace: kubevirt
+  resourceVersion: "109515107"
+  selfLink: /api/v1/namespaces/kubevirt/endpoints/cd
+  uid: 142f062f-5c60-11e9-8619-0cc47a66a2d4
+subsets:
+- addresses:
+  - ip: 10.131.3.220
+    nodeName: n28.dumpty.ci.centos.org
+    targetRef:
+      kind: Pod
+      name: cd-1-f35v0
+      namespace: kubevirt
+      resourceVersion: "109515104"
+      uid: 15ef2e20-5c60-11e9-8619-0cc47a66a2d4
+  ports:
+  - name: web
+    port: 8080
+    protocol: TCP

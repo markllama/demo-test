@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+  creationTimestamp: 2018-07-13T20:43:54Z
+  generation: 1
+  labels:
+    app: jenkins
+    template: jenkins-kubevirt-persistent
+  name: jenkins
+  namespace: kubevirt
+  resourceVersion: "54992885"
+  selfLink: /oapi/v1/namespaces/kubevirt/imagestreams/jenkins
+  uid: 74d2ef90-86dd-11e8-8b52-0cc47a66a374
+spec:
+  lookupPolicy:
+    local: false
+status:
+  dockerImageRepository: 172.30.254.79:5000/kubevirt/jenkins
+  tags:
+  - items:
+    - created: 2018-07-16T21:26:11Z
+      dockerImageReference: 172.30.254.79:5000/kubevirt/jenkins@sha256:503d36364ab527016f8b5052217145b8657cc2503c97c9d49f72997d1d89c0b9
+      generation: 1
+      image: sha256:503d36364ab527016f8b5052217145b8657cc2503c97c9d49f72997d1d89c0b9
+    - created: 2018-07-13T20:45:01Z
+      dockerImageReference: 172.30.254.79:5000/kubevirt/jenkins@sha256:1dcf63b3c053317bc3b68ecbaab1bb30def6f376415511d95eb7c2e9a3bd37f3
+      generation: 1
+      image: sha256:1dcf63b3c053317bc3b68ecbaab1bb30def6f376415511d95eb7c2e9a3bd37f3
+    tag: latest

@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    template.alpha.openshift.io/wait-for-ready: "true"
+  name: test
+  namespace: kubevirt
+spec:
+  replicas: 1
+  selector:
+    name: test
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: test
+    spec:
+      containers:
+      - env:
+        - name: OPENSHIFT_ENABLE_OAUTH
+          value: "true"
+        - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+          value: "true"
+        - name: OPENSHIFT_JENKINS_JVM_ARCH
+          value: x86_64
+        - name: KUBERNETES_MASTER
+          value: https://kubernetes.default:443
+        - name: KUBERNETES_TRUST_CERTIFICATES
+          value: "true"
+        - name: JNLP_SERVICE_NAME
+          value: test-jnlp
+        - name: JENKINS_PASSWORD
+          value: changeme
+        - name: INSTALL_PLUGINS
+          value: "aws-credentials:1.26,aws-java-sdk:1.11.457,copyartifact:1.42,email-ext:2.66,external-monitor-job:1.7,extra-columns:1.20,github-oauth:0.31,google-compute-engine:3.0.0,google-oauth-plugin:0.7,groovy:2.2,icon-shim:2.0.3,instant-messaging:1.35,jms-messaging:1.1.6,jquery:1.12.4-0,oauth-credentials:0.3,pipeline-aws:1.36,scm-sync-configuration:0.0.10,shared-workspace:1.0.2,ssh-agent:1.17,ssh-slaves:1.29.4,ws-cleanup:0.37"
+        image: openshift/jenkins-2-centos7
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /login
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 420
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        name: jenkins
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /login
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        resources:
+          limits:
+            memory: 16Gi
+        securityContext:
+          capabilities: {}
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/jenkins
+          name: test-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: test
+      serviceAccountName: test
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: test-data
+  test: false
+  # triggers:
+  # - imageChangeParams:
+  #     automatic: true
+  #     containerNames:
+  #     - jenkins
+  #     from:
+  #       kind: ImageStreamTag
+  #       name: jenkins:latest
+  #       namespace: openshift
+  #     lastTriggeredImage: openshift/jenkins-2-centos7@sha256:a6e0a1122288625afde9ff5fb548dd48db8dc2768a76b53367818e870c1861a9
+  #   type: ImageChange
+  # - type: ConfigChange

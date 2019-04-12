@@ -1,0 +1,14 @@
+apiVersion: v1
+groupNames: null
+kind: RoleBinding
+metadata:
+  name: test_edit
+  namespace: kubevirt
+roleRef:
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: test
+  namespace: kubevirt
+userNames:
+- system:serviceaccount:kubevirt:test

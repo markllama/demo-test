@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/dependencies: '[{"name": "cd-jnlp", "namespace": "",
+      "kind": "Service"}]'
+    service.openshift.io/infrastructure: "true"
+  creationTimestamp: 2019-04-11T13:45:33Z
+  labels:
+    app: jenkins-ephemeral
+    template: jenkins-ephemeral-template
+  name: cd
+  namespace: kubevirt
+  resourceVersion: "109514947"
+  selfLink: /api/v1/namespaces/kubevirt/services/cd
+  uid: 142d6c3d-5c60-11e9-8619-0cc47a66a2d4
+spec:
+  clusterIP: 172.30.65.169
+  ports:
+  - name: web
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    name: cd
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

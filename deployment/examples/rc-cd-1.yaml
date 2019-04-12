@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  annotations:
+    openshift.io/deployer-pod.name: cd-1-deploy
+    openshift.io/deployment-config.latest-version: "1"
+    openshift.io/deployment-config.name: cd
+    openshift.io/deployment.phase: Complete
+    openshift.io/deployment.replicas: "1"
+    openshift.io/deployment.status-reason: image change
+    openshift.io/encoded-deployment-config: |
+      {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"cd","namespace":"kubevirt","selfLink":"/apis/apps.openshift.io/v1/namespaces/kubevirt/deploymentconfigs/cd","uid":"1428a6bb-5c60-11e9-8619-0cc47a66a2d4","resourceVersion":"109514942","generation":2,"creationTimestamp":"2019-04-11T13:45:33Z","labels":{"app":"jenkins-ephemeral","template":"jenkins-ephemeral-template"},"annotations":{"template.alpha.openshift.io/wait-for-ready":"true"}},"spec":{"strategy":{"type":"Recreate","recreateParams":{"timeoutSeconds":600},"resources":{},"activeDeadlineSeconds":21600},"triggers":[{"type":"ImageChange","imageChangeParams":{"automatic":true,"containerNames":["jenkins"],"from":{"kind":"ImageStreamTag","namespace":"openshift","name":"jenkins:latest"},"lastTriggeredImage":"openshift/jenkins-2-centos7@sha256:a6e0a1122288625afde9ff5fb548dd48db8dc2768a76b53367818e870c1861a9"}},{"type":"ConfigChange"}],"replicas":1,"test":false,"selector":{"name":"cd"},"template":{"metadata":{"creationTimestamp":null,"labels":{"name":"cd"}},"spec":{"volumes":[{"name":"cd-data","emptyDir":{}}],"containers":[{"name":"jenkins","image":"openshift/jenkins-2-centos7@sha256:a6e0a1122288625afde9ff5fb548dd48db8dc2768a76b53367818e870c1861a9","env":[{"name":"OPENSHIFT_ENABLE_OAUTH","value":"true"},{"name":"OPENSHIFT_ENABLE_REDIRECT_PROMPT","value":"true"},{"name":"OPENSHIFT_JENKINS_JVM_ARCH","value":"x86_64"},{"name":"KUBERNETES_MASTER","value":"https://kubernetes.default:443"},{"name":"KUBERNETES_TRUST_CERTIFICATES","value":"true"},{"name":"JNLP_SERVICE_NAME","value":"cd-jnlp"}],"resources":{"limits":{"memory":"16Gi"}},"volumeMounts":[{"name":"cd-data","mountPath":"/var/lib/jenkins"}],"livenessProbe":{"httpGet":{"path":"/login","port":8080,"scheme":"HTTP"},"initialDelaySeconds":420,"timeoutSeconds":3,"periodSeconds":10,"successThreshold":1,"failureThreshold":30},"readinessProbe":{"httpGet":{"path":"/login","port":8080,"scheme":"HTTP"},"initialDelaySeconds":3,"timeoutSeconds":3,"periodSeconds":10,"successThreshold":1,"failureThreshold":3},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent","securityContext":{"capabilities":{},"privileged":false}}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","serviceAccountName":"cd","serviceAccount":"cd","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":1,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"image change","causes":[{"type":"ImageChange","imageTrigger":{"from":{"kind":"ImageStreamTag","namespace":"openshift","name":"jenkins:latest"}}}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2019-04-11T13:45:33Z","lastTransitionTime":"2019-04-11T13:45:33Z","message":"Deployment config does not have minimum availability."}]}}
+  creationTimestamp: 2019-04-11T13:45:33Z
+  generation: 2
+  labels:
+    app: jenkins-ephemeral
+    openshift.io/deployment-config.name: cd
+    template: jenkins-ephemeral-template
+  name: cd-1
+  namespace: kubevirt
+  ownerReferences:
+  - apiVersion: apps.openshift.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: DeploymentConfig
+    name: cd
+    uid: 1428a6bb-5c60-11e9-8619-0cc47a66a2d4
+  resourceVersion: "109515113"
+  selfLink: /api/v1/namespaces/kubevirt/replicationcontrollers/cd-1
+  uid: 142dc539-5c60-11e9-8619-0cc47a66a2d4
+spec:
+  replicas: 1
+  selector:
+    deployment: cd-1
+    deploymentconfig: cd
+    name: cd
+  template:
+    metadata:
+      annotations:
+        openshift.io/deployment-config.latest-version: "1"
+        openshift.io/deployment-config.name: cd
+        openshift.io/deployment.name: cd-1
+      creationTimestamp: null
+      labels:
+        deployment: cd-1
+        deploymentconfig: cd
+        name: cd
+    spec:
+      containers:
+      - env:
+        - name: OPENSHIFT_ENABLE_OAUTH
+          value: "true"
+        - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+          value: "true"
+        - name: OPENSHIFT_JENKINS_JVM_ARCH
+          value: x86_64
+        - name: KUBERNETES_MASTER
+          value: https://kubernetes.default:443
+        - name: KUBERNETES_TRUST_CERTIFICATES
+          value: "true"
+        - name: JNLP_SERVICE_NAME
+          value: cd-jnlp
+        image: openshift/jenkins-2-centos7@sha256:a6e0a1122288625afde9ff5fb548dd48db8dc2768a76b53367818e870c1861a9
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /login
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 420
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        name: jenkins
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /login
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        resources:
+          limits:
+            memory: 16Gi
+        securityContext:
+          capabilities: {}
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/jenkins
+          name: cd-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: cd
+      serviceAccountName: cd
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: cd-data
+status:
+  availableReplicas: 1
+  fullyLabeledReplicas: 1
+  observedGeneration: 2
+  readyReplicas: 1
+  replicas: 1

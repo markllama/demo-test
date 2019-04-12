@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/dependencies: '[{"name": "test-jnlp", "namespace": "",
+      "kind": "Service"}]'
+    service.openshift.io/infrastructure: "true"
+  name: test
+  namespace: kubevirt
+spec:
+  ports:
+  - name: web
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    name: test
+  sessionAffinity: None
+  type: ClusterIP
