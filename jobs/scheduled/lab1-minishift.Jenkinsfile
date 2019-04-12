@@ -84,7 +84,7 @@ properties(
                 ],
                 [
                     name: 'PERSIST',
-                    description: 'leave the minikube service in place',
+                    description: 'leave the minishift service in place',
                     $class: 'hudson.model.BooleanParameterDefinition',
                     defaultValue: false
                 ],
@@ -133,9 +133,9 @@ node(TARGET_NODE) {
     }
     echo "KUBEVIRT_VERSION = '${KUBEVIRT_VERSION}'"
 
-    stage("run lab1 on Minikube") {
+    stage("run lab1 on Minishift") {
         demo = build(
-            job: "kubevirt/minikube-demo-test",
+            job: "kubevirt/minishift-demo-test",
             propagate: false,
             parameters: [
                 [
