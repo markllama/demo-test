@@ -62,7 +62,7 @@ properties(
                     name: "DEMO_GIT_BRANCH",
                     description: "The branch that contains the of the demo to run",
                     $class: 'hudson.model.StringParameterDefinition',
-                    defaultValue: "labs"
+                    defaultValue: "master"
                 ],
                 [
                     name: "DEMO_ROOT",
