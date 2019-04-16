@@ -34,7 +34,6 @@ properties(
                     description: 'Which virtualization driver to use',
                     $class: 'hudson.model.ChoiceParameterDefinition',
                     choices: [
-                        "kvm2",
                         "kvm",
                         "virtualbox"
                     ].join("\n"),
